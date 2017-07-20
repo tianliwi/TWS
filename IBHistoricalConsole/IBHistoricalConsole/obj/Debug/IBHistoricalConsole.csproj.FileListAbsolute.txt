@@ -1,0 +1,14 @@
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/IBHistoricalConsole.exe.config
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/IBHistoricalConsole.exe
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/IBHistoricalConsole.pdb
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/CSharpAPI.dll
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.csprojResolveAssemblyReference.cache
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.exe
+E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.pdb
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/IBHistoricalConsole.exe.config
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/IBHistoricalConsole.exe
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/IBHistoricalConsole.pdb
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/bin/Debug/CSharpAPI.dll
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.csproj.CoreCompileInputs.cache
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.exe
+/Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.pdb
