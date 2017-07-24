@@ -12,3 +12,6 @@ E:/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IB
 /Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.csproj.CoreCompileInputs.cache
 /Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.exe
 /Users/tianli8012/OneDrive - Microsoft/TWS/IBHistoricalConsole/IBHistoricalConsole/obj/Debug/IBHistoricalConsole.pdb
+E:\GitHub\TWS\IBHistoricalConsole\IBHistoricalConsole\bin\Debug\IBHistoricalConsole.exe.config
+E:\GitHub\TWS\IBHistoricalConsole\IBHistoricalConsole\obj\Debug\IBHistoricalConsole.exe
+E:\GitHub\TWS\IBHistoricalConsole\IBHistoricalConsole\obj\Debug\IBHistoricalConsole.pdb

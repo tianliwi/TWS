@@ -1,0 +1,6 @@
+E:\GitHub\TWS\LTTrader\BaseModel\bin\Debug\BaseModel.dll
+E:\GitHub\TWS\LTTrader\BaseModel\bin\Debug\BaseModel.pdb
+E:\GitHub\TWS\LTTrader\BaseModel\bin\Debug\CSharpAPI.dll
+E:\GitHub\TWS\LTTrader\BaseModel\obj\Debug\BaseModel.csprojResolveAssemblyReference.cache
+E:\GitHub\TWS\LTTrader\BaseModel\obj\Debug\BaseModel.dll
+E:\GitHub\TWS\LTTrader\BaseModel\obj\Debug\BaseModel.pdb
