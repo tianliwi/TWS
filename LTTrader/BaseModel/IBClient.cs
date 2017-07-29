@@ -28,13 +28,13 @@ namespace BaseModel
         public string Host { get; set; }
         public int Port { get; set; }
         public int ClientId { get; set; }
-        public bool isServerConnected
+        public bool isConnected
         {
             get { return clientSocket.IsConnected(); }
         }
         #endregion
 
-        public IBClient() : this("127.0.0.1", 7409, 0) { }
+        public IBClient() : this("127.0.0.1", 7490, 0) { }
         public IBClient(string host, int port, int clientId = 0)
         {
             Host = host;
@@ -62,8 +62,13 @@ namespace BaseModel
                 Console.WriteLine(e.Message);
             }
         }
+        
+        public virtual void historicalData(int reqId, string date, double open, double high, double low, double close, int volume, int count, double WAP, bool hasGaps)
+        {
+            Console.WriteLine("HistoricalData. " + reqId + " - Date: " + date + ", Open: " + open + ", High: " + high + ", Low: " + low + ", Close: " + close + ", Volume: " + volume + ", Count: " + count + ", WAP: " + WAP + ", HasGaps: " + hasGaps);
+        }
 
-        #region EWrapperMethods
+        #region Unimplemented
         public virtual void error(Exception e)
         {
             Console.WriteLine("Exception thrown: " + e);
@@ -267,14 +272,7 @@ namespace BaseModel
             Console.WriteLine("FundamentalData. " + reqId + "" + data + "\n");
         }
         //! [fundamentaldata]
-
-        //! [historicaldata]
-        public virtual void historicalData(int reqId, string date, double open, double high, double low, double close, int volume, int count, double WAP, bool hasGaps)
-        {
-            Console.WriteLine("HistoricalData. " + reqId + " - Date: " + date + ", Open: " + open + ", High: " + high + ", Low: " + low + ", Close: " + close + ", Volume: " + volume + ", Count: " + count + ", WAP: " + WAP + ", HasGaps: " + hasGaps);
-        }
-        //! [historicaldata]
-
+        
         //! [marketdatatype]
         public virtual void marketDataType(int reqId, int marketDataType)
         {
