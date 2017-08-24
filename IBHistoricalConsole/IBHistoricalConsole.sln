@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBHistoricalConsole", "IBHistoricalConsole\IBHistoricalConsole.csproj", "{44313595-1C8A-4896-9BE9-A66E1594BC74}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalDataDownloader", "HistoricalDataDownloader\HistoricalDataDownloader.csproj", "{A57CC1D1-0EAA-4AFA-8709-59D2844965F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpAPI", "client\CSharpAPI.csproj", "{8EDE0744-96C2-40B0-A8DC-37DF79370203}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{44313595-1C8A-4896-9BE9-A66E1594BC74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44313595-1C8A-4896-9BE9-A66E1594BC74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44313595-1C8A-4896-9BE9-A66E1594BC74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A57CC1D1-0EAA-4AFA-8709-59D2844965F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A57CC1D1-0EAA-4AFA-8709-59D2844965F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A57CC1D1-0EAA-4AFA-8709-59D2844965F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A57CC1D1-0EAA-4AFA-8709-59D2844965F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EDE0744-96C2-40B0-A8DC-37DF79370203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
