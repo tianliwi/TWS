@@ -25,17 +25,20 @@ namespace IBTrader
                 new Thread(() => { while (ibClient.ClientSocket.IsConnected()) { signal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
 
                 Contract contract = new Contract();
-                string endTime = "20170824 00:00:04";
-                string duration = "3000 S";
+                string endTime = "20170824 00:00:00";
+                string duration = "28800 S";
                 string barSize = "1 min";
-                string whatToShow = "MIDPOINT";
+                //string whatToShow = "BID";
                 contract.Symbol = "EUR";
                 contract.SecType = "CASH";
                 contract.Exchange = "IDEALPRO";
                 contract.Currency = "USD";
-                ibClient.ClientSocket.reqHistoricalData(111, contract, endTime,
-                    duration, barSize, whatToShow, 0, 1,
+                ibClient.ClientSocket.reqHistoricalData((int)TickerIdType.BID, contract, endTime,
+                    duration, barSize, "BID", 0, 1,
                     new List<TagValue>());
+                //ibClient.ClientSocket.reqHistoricalData((int)TickerIdType.ASK, contract, endTime,
+                //    duration, barSize, "ASK", 0, 1,
+                //    new List<TagValue>());
 
                 Console.ReadKey();
                 ibClient.ClientSocket.eDisconnect();

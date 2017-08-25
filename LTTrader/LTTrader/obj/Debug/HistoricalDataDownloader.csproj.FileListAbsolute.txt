@@ -1,9 +1,0 @@
-E:\GitHub\TWS\LTTrader\LTTrader\bin\Debug\LTTrader.exe.config
-E:\GitHub\TWS\LTTrader\LTTrader\bin\Debug\LTTrader.exe
-E:\GitHub\TWS\LTTrader\LTTrader\bin\Debug\LTTrader.pdb
-E:\GitHub\TWS\LTTrader\LTTrader\bin\Debug\BaseModel.dll
-E:\GitHub\TWS\LTTrader\LTTrader\bin\Debug\CSharpAPI.dll
-E:\GitHub\TWS\LTTrader\LTTrader\bin\Debug\BaseModel.pdb
-E:\GitHub\TWS\LTTrader\LTTrader\obj\Debug\HistoricalDataDownloader.csprojResolveAssemblyReference.cache
-E:\GitHub\TWS\LTTrader\LTTrader\obj\Debug\LTTrader.exe
-E:\GitHub\TWS\LTTrader\LTTrader\obj\Debug\LTTrader.pdb

@@ -441,6 +441,7 @@ namespace IBTrader
 
             if (tmp != null)
                 tmp(reqId, startDate, endDate);
+            Console.WriteLine("Historical data loaded! {0}, {1}, {2}", reqId, startDate, endDate);
         }
 
         public event Action<int, int> MarketDataType;
@@ -627,6 +628,7 @@ namespace IBTrader
         {
             if (ClientSocket.AsyncEConnect)
                 ClientSocket.startApi();
+            Console.WriteLine("Connected!");
         }
 
         public event Action<int, string, string, Contract, double, double> PositionMulti;
