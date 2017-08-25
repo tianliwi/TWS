@@ -43,8 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backend\MessageType.cs" />
     <Compile Include="EWrapperImpl.cs" />
     <Compile Include="Backend\IBClient.cs" />
+    <Compile Include="HistoricalDataManager.cs" />
+    <Compile Include="Messages\HistoricalDataMessage.cs" />
+    <Compile Include="Messages\IBMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
