@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using IBApi;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace IBTrader
 {
@@ -104,7 +105,7 @@ namespace IBTrader
             set { clientId = value; }
         }
 
-        public IBClient(EReaderSignal signal)
+        public IBClient(EReaderMonitorSignal signal)
         {
             clientSocket = new EClientSocket(this, signal);
         }

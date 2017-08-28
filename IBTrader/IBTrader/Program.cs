@@ -15,15 +15,8 @@ namespace IBTrader
             EReaderMonitorSignal signal = new EReaderMonitorSignal();
             try
             {
-                IBClient ibClient = new IBClient(signal);
-                ibClient.HistoricalData += (reqId, date, open, high, low, close, volume, count, WAP, hasGaps) =>
-                    HandleMessage(new HistoricalDataMessage(reqId, date, open, high, low, close, volume, count, WAP, hasGaps));
-                ibClient.ClientSocket.eConnect("127.0.0.1", 7496, 1);
-
-                var reader = new EReader(ibClient.ClientSocket, signal);
-                reader.Start();
-
-                new Thread(() => { while (ibClient.ClientSocket.IsConnected()) { signal.waitForSignal(); reader.processMsgs(); } }) { IsBackground = true }.Start();
+                Trader trader = new Trader();
+                trader.Connect();
 
                 Contract contract = new Contract();
                 string endTime = DateTime.Now.ToString("yyyyMMdd HH:mm:ss");
@@ -36,24 +29,14 @@ namespace IBTrader
                 contract.Exchange = "IDEALPRO";
                 contract.Currency = "USD";
 
+                trader.ibClient.ClientSocket.reqHistoricalData(200, contract, endTime, duration, barSize, "BID", 0, 1, new List<TagValue>());
+
                 Console.ReadKey();
-                ibClient.ClientSocket.eDisconnect();
+                trader.Disconnect();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-            }
-        }
-        static public void HandleMessage(IBMessage message)
-        {
-            if (this.InvokeRequired)
-            {
-                MessageHandlerDelegate callback = new MessageHandlerDelegate(HandleMessage);
-                this.Invoke(callback, new object[] { message });
-            }
-            else
-            {
-                UpdateUI(message);
             }
         }
     }
