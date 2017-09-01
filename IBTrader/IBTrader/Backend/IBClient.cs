@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using IBApi;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Data;
+using System.IO;
 
 namespace IBTrader
 {
@@ -424,14 +426,11 @@ namespace IBTrader
 
         void EWrapper.historicalData(int reqId, string date, double open, double high, double low, double close, int volume, int count, double WAP, bool hasGaps)
         {
-            /*
             var tmp = HistoricalData;
 
             if (tmp != null)
                 tmp(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
-            */
-
-            Console.WriteLine("Date: " + date + ", O: " + open + ", H: " + high + ", L: " + low + ", C: " + close);
+            //Console.WriteLine("Date: " + date + ", O: " + open + ", H: " + high + ", L: " + low + ", C: " + close);
         }
 
         public event Action<int, string, string> HistoricalDataEnd;
@@ -442,7 +441,7 @@ namespace IBTrader
 
             if (tmp != null)
                 tmp(reqId, startDate, endDate);
-            Console.WriteLine("Historical data loaded! {0}, {1}, {2}", reqId, startDate, endDate);
+            //Console.WriteLine("Historical data loaded! {0}, {1}, {2}", reqId, startDate, endDate);
         }
 
         public event Action<int, int> MarketDataType;

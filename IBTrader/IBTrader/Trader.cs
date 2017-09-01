@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using IBApi;
 using System.Threading;
+using System.Data;
+using System.IO;
 
 namespace IBTrader
 {
@@ -13,6 +15,8 @@ namespace IBTrader
         public IBClient ibClient;
         private EReaderMonitorSignal signal;
         private EReader reader;
+        private DataTable historicalDataChunk;
+        private List<HistoricalDataMessage> historicalDataList;
 
         delegate void MessageHandlerDelegate(IBMessage message);
 
@@ -20,11 +24,15 @@ namespace IBTrader
         {
             signal = new EReaderMonitorSignal();
             ibClient = new IBClient(signal);
-            
+
+            //prepareHistoricalDataTable();
+            historicalDataList = new List<HistoricalDataMessage>();
+
             ibClient.HistoricalData += (reqId, date, open, high, low, close, volume, count, WAP, hasGaps) =>
                 HandleMessage(new HistoricalDataMessage(reqId, date, open, high, low, close, volume, count, WAP, hasGaps));
+            ibClient.HistoricalDataEnd += (reqId, startDate, endDate) => HandleMessage(new HistoricalDataEndMessage(reqId, startDate, endDate)); ;
         }
-
+        
         public void Connect()
         {
             ibClient.ClientSocket.eConnect("127.0.0.1", 7496, 1);
@@ -38,9 +46,63 @@ namespace IBTrader
             ibClient.ClientSocket.eDisconnect();
         }
 
+        private void prepareHistoricalDataTable()
+        {
+            historicalDataChunk = new DataTable("HDChunk");
+            historicalDataChunk.Columns.Add("time", typeof(string));
+            historicalDataChunk.Columns.Add("open", typeof(double));
+            historicalDataChunk.Columns.Add("high", typeof(double));
+            historicalDataChunk.Columns.Add("low", typeof(double));
+            historicalDataChunk.Columns.Add("close", typeof(double));
+            historicalDataChunk.Columns.Add("volume", typeof(double));
+        }
         public void HandleMessage(IBMessage message)
         {
-            MessageHandlerDelegate callback = new MessageHandlerDelegate(HandleMessage);
+            switch (message.Type)
+            {
+                case MessageType.HistoricalData:
+                    {
+                        /*
+                        HistoricalDataMessage hdMessage = (HistoricalDataMessage)message;
+                        DataRow row = historicalDataChunk.NewRow();
+                        row["time"] = hdMessage.Date;
+                        row["open"] = hdMessage.Open;
+                        row["high"] = hdMessage.High;
+                        row["low"] = hdMessage.Low;
+                        row["close"] = hdMessage.Close;
+                        row["volume"] = 0;
+                        historicalDataChunk.Rows.Add(row);
+                        */
+                        historicalDataList.Add((HistoricalDataMessage)message);
+                        break;
+                    }
+                case MessageType.HistoricalDataEnd:
+                    {
+                        /*
+                        historicalDataChunk.WriteXml("test.xml");
+
+                        var lines = new List<string>();
+                        var valueLines = historicalDataChunk.AsEnumerable().Select(
+                            row => string.Join(", ", row.ItemArray));
+                        lines.AddRange(valueLines);
+                        File.WriteAllLines("excel.csv", lines);
+                        */
+                        var lines = new List<string>();
+                        foreach(var data in historicalDataList)
+                        {
+                            var line = data.Date + ", " + data.Open + ", " + data.High + ", " + data.Low + ", " + data.Close + ", 0";
+                            lines.Add(line);
+                        }
+                        File.AppendAllLines("excel.csv", lines);
+                        HistoricalDataEndMessage hdeMessage = (HistoricalDataEndMessage)message;
+                        Console.WriteLine("Historical data from {0} to {1} has been saved.", hdeMessage.StartDate, hdeMessage.EndDate);
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
         }
 
     }
