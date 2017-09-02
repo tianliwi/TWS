@@ -17,6 +17,8 @@ namespace IBTrader
         private EReader reader;
         private DataTable historicalDataChunk;
         private List<HistoricalDataMessage> historicalDataList;
+        public List<string> _historicalDataList;
+        private bool _allHistoricalDataLoaded;
 
         delegate void MessageHandlerDelegate(IBMessage message);
 
@@ -25,7 +27,9 @@ namespace IBTrader
             signal = new EReaderMonitorSignal();
             ibClient = new IBClient(signal);
 
-            //prepareHistoricalDataTable();
+            _historicalDataList = new List<string>();
+            _allHistoricalDataLoaded = false;
+
             historicalDataList = new List<HistoricalDataMessage>();
 
             ibClient.HistoricalData += (reqId, date, open, high, low, close, volume, count, WAP, hasGaps) =>
@@ -73,7 +77,10 @@ namespace IBTrader
                         row["volume"] = 0;
                         historicalDataChunk.Rows.Add(row);
                         */
-                        historicalDataList.Add((HistoricalDataMessage)message);
+                        //historicalDataList.Add((HistoricalDataMessage)message);
+                        HistoricalDataMessage b = (HistoricalDataMessage)message;
+                        string line = b.Date + "," + b.Open + "," + b.High + "," + b.Low + "," + b.Close + "," + b.Volume;
+                        _historicalDataList.Add(line);
                         break;
                     }
                 case MessageType.HistoricalDataEnd:
@@ -87,15 +94,17 @@ namespace IBTrader
                         lines.AddRange(valueLines);
                         File.WriteAllLines("excel.csv", lines);
                         */
+                        /*
                         var lines = new List<string>();
                         foreach(var data in historicalDataList)
                         {
                             var line = data.Date + ", " + data.Open + ", " + data.High + ", " + data.Low + ", " + data.Close + ", 0";
                             lines.Add(line);
                         }
-                        File.AppendAllLines("excel.csv", lines);
+                        File.WriteAllLines("excel.csv", lines);
                         HistoricalDataEndMessage hdeMessage = (HistoricalDataEndMessage)message;
                         Console.WriteLine("Historical data from {0} to {1} has been saved.", hdeMessage.StartDate, hdeMessage.EndDate);
+                        */
                         break;
                     }
                 default:
