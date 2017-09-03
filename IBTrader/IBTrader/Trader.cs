@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,8 @@ namespace IBTrader
         private EReader reader;
         private DataTable historicalDataChunk;
         private List<HistoricalDataMessage> historicalDataList;
-        public List<string> _historicalDataList;
+        public List<FxHistoricalDataMessage> _fxHistoricalDataList;
+		public Dictionary<string, FxHistoricalDataMessage> _fxHistoricalDataDict;
         private bool _allHistoricalDataLoaded;
 
         delegate void MessageHandlerDelegate(IBMessage message);
@@ -27,7 +29,8 @@ namespace IBTrader
             signal = new EReaderMonitorSignal();
             ibClient = new IBClient(signal);
 
-            _historicalDataList = new List<string>();
+            _fxHistoricalDataList = new List<FxHistoricalDataMessage>();
+			_fxHistoricalDataDict = new Dictionary<string, FxHistoricalDataMessage>();
             _allHistoricalDataLoaded = false;
 
             historicalDataList = new List<HistoricalDataMessage>();
@@ -65,46 +68,58 @@ namespace IBTrader
             switch (message.Type)
             {
                 case MessageType.HistoricalData:
-                    {
-                        /*
-                        HistoricalDataMessage hdMessage = (HistoricalDataMessage)message;
-                        DataRow row = historicalDataChunk.NewRow();
-                        row["time"] = hdMessage.Date;
-                        row["open"] = hdMessage.Open;
-                        row["high"] = hdMessage.High;
-                        row["low"] = hdMessage.Low;
-                        row["close"] = hdMessage.Close;
-                        row["volume"] = 0;
-                        historicalDataChunk.Rows.Add(row);
-                        */
-                        //historicalDataList.Add((HistoricalDataMessage)message);
-                        HistoricalDataMessage b = (HistoricalDataMessage)message;
-                        string line = b.Date + "," + b.Open + "," + b.High + "," + b.Low + "," + b.Close + "," + b.Volume;
-                        _historicalDataList.Add(line);
-                        break;
-                    }
+					{
+						HistoricalDataMessage b = (HistoricalDataMessage)message;
+						if (b.RequestId == (int)MessageType.FxHistoricalAsk)
+						{
+							DateTime dt = DateTime.ParseExact(b.Date, "yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
+							dt += new TimeSpan(3, 0, 0);
+							string date = dt.ToString("yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
+							if (_fxHistoricalDataDict.ContainsKey(date))
+							{
+								_fxHistoricalDataDict[date].Date = date;
+								_fxHistoricalDataDict[date].OpenAsk = b.Open;
+								_fxHistoricalDataDict[date].HighAsk = b.High;
+								_fxHistoricalDataDict[date].LowAsk = b.Low;
+								_fxHistoricalDataDict[date].CloseAsk = b.Close;
+							}
+							else {
+								FxHistoricalDataMessage d = new FxHistoricalDataMessage();
+								d.Date = date;
+								d.OpenAsk = b.Open;
+								d.HighAsk = b.High;
+								d.LowAsk = b.Low;
+								d.CloseAsk = b.Close;
+								_fxHistoricalDataDict.Add(date,d);
+							}
+						}
+						else if (b.RequestId == (int)MessageType.FxHistoricalBid)
+						{
+							DateTime dt = DateTime.ParseExact(b.Date, "yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
+							dt += new TimeSpan(3, 0, 0);
+							string date = dt.ToString("yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
+							if (_fxHistoricalDataDict.ContainsKey(date))
+							{
+								_fxHistoricalDataDict[date].Date = date;
+								_fxHistoricalDataDict[date].OpenBid = b.Open;
+								_fxHistoricalDataDict[date].HighBid = b.High;
+								_fxHistoricalDataDict[date].LowBid = b.Low;
+								_fxHistoricalDataDict[date].CloseBid = b.Close;
+							}
+							else {
+								FxHistoricalDataMessage d = new FxHistoricalDataMessage();
+								d.Date = date;
+								d.OpenBid = b.Open;
+								d.HighBid = b.High;
+								d.LowBid = b.Low;
+								d.CloseBid = b.Close;
+								_fxHistoricalDataDict.Add(date, d);
+							}
+						}
+						break;
+					}
                 case MessageType.HistoricalDataEnd:
                     {
-                        /*
-                        historicalDataChunk.WriteXml("test.xml");
-
-                        var lines = new List<string>();
-                        var valueLines = historicalDataChunk.AsEnumerable().Select(
-                            row => string.Join(", ", row.ItemArray));
-                        lines.AddRange(valueLines);
-                        File.WriteAllLines("excel.csv", lines);
-                        */
-                        /*
-                        var lines = new List<string>();
-                        foreach(var data in historicalDataList)
-                        {
-                            var line = data.Date + ", " + data.Open + ", " + data.High + ", " + data.Low + ", " + data.Close + ", 0";
-                            lines.Add(line);
-                        }
-                        File.WriteAllLines("excel.csv", lines);
-                        HistoricalDataEndMessage hdeMessage = (HistoricalDataEndMessage)message;
-                        Console.WriteLine("Historical data from {0} to {1} has been saved.", hdeMessage.StartDate, hdeMessage.EndDate);
-                        */
                         break;
                     }
                 default:

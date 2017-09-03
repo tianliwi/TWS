@@ -14,12 +14,13 @@ namespace HistoricalDataDownloader
     {
         static void Main(string[] args)
         {
-            //testData();
-            //return;
+			//testData();
+			//return;
+
             Trader trader = new Trader();
             trader.Connect();
 
-            string _enddate = "20170801";// DateTime.Today.ToString("yyyyMMdd");
+            string _enddate = "20170831";
 
             DateTime _startTime = DateTime.SpecifyKind(DateTime.ParseExact(_enddate, "yyyyMMdd", null), DateTimeKind.Local);
             DateTime _endTime = _startTime + new TimeSpan(1, 0, 0, 0);          // one day later
@@ -34,7 +35,7 @@ namespace HistoricalDataDownloader
             DateTime t = _startTime + eightHours;
             string sym = "EUR";
 
-            Console.WriteLine("Requesting historical bars for :" + sym);
+			Console.WriteLine("Requesting historical bars for {0} on {1}...", sym, _startTime.ToShortDateString());
             for (int i = 0; i < totalRequests; i++)
             {
                 Console.WriteLine("Request #: " + (i + 1).ToString() + "/" + totalRequests);
@@ -47,7 +48,11 @@ namespace HistoricalDataDownloader
                 contract.SecType = "CASH";
                 contract.Exchange = "IDEALPRO";
                 contract.Currency = "USD";
-                trader.ibClient.ClientSocket.reqHistoricalData(200, contract, t.ToString("yyyyMMdd HH:mm:ss"), duration, barSize, "MIDPOINT", 1, 1, new List<TagValue>());
+
+				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalAsk, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "ASK", 1, 1, new List<TagValue>());
+				Thread.Sleep(10000);
+
+				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalBid, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "BID", 1, 1, new List<TagValue>());
 
                 // Do not make more than 60 historical data requests in any ten-minute period.
                 // If I have 10 names, each can only make 6 requests in ten minute;
@@ -59,40 +64,13 @@ namespace HistoricalDataDownloader
                 t += eightHours;
             }
 
-            File.WriteAllLines("origin.csv", trader._historicalDataList);
-            File.WriteAllLines("nodup.csv", trader._historicalDataList.Distinct().ToList());
+			string projectPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase)));
+			Console.WriteLine(projectPath);
+			File.WriteAllLines("/Users/tianli8012/GitHub/TWS/nodup.csv", trader._fxHistoricalDataDict.Distinct().Select(i => i.Value.ToString()));
 
-            Console.WriteLine("done.");
+			Console.WriteLine("done.");
             Console.ReadKey();
             trader.Disconnect();
-            /*
-            try
-            {
-                Trader trader = new Trader();
-                trader.Connect();
-
-                Contract contract = new Contract();
-                string startTime = "20150101 00:00:00 GMT";
-                string endTime = "20150102 00:00:00 GMT";//"20170901  06:16:00 GMT";// DateTime.Now.ToString("yyyyMMdd HH:mm:ss");
-
-                string duration = "28800 S";
-                string barSize = "1 min";
-                //string whatToShow = "BID";
-                contract.Symbol = "EUR";
-                contract.SecType = "CASH";
-                contract.Exchange = "IDEALPRO";
-                contract.Currency = "USD";
-
-                trader.ibClient.ClientSocket.reqHistoricalData(200, contract, endTime, duration, barSize, "BID", 0, 1, new List<TagValue>());
-
-                Console.ReadKey();
-                trader.Disconnect();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            */
         }
         static void testData()
         {
@@ -107,18 +85,17 @@ namespace HistoricalDataDownloader
 
                 string duration = "900 S";
                 string barSize = "1 min";
-                //string whatToShow = "BID";
                 contract.Symbol = "EUR";
                 contract.SecType = "CASH";
                 contract.Exchange = "IDEALPRO";
                 contract.Currency = "USD";
 
-                trader.ibClient.ClientSocket.reqHistoricalData(200, contract, endTime, duration, barSize, "BID", 0, 1, new List<TagValue>());
+				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalBid, contract, endTime, duration, barSize, "BID", 0, 1, new List<TagValue>());
 
                 Console.ReadKey();
-                foreach(string s in trader._historicalDataList)
+                foreach(var s in trader._fxHistoricalDataList)
                 {
-                    Console.WriteLine(s);
+					Console.WriteLine(s.ToString());
                 }
                 trader.Disconnect();
             }

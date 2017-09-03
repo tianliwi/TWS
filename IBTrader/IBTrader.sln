@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBSampleApp", "..\TWS API\s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalDataDownloader", "HistoricalDataDownloader\HistoricalDataDownloader.csproj", "{280DBC9F-7D75-435D-81C2-DE66C54DC8A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalDataPlot", "HistoricalDataPlot\HistoricalDataPlot.csproj", "{89245819-598D-4ADE-9563-9E9F6D446547}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{280DBC9F-7D75-435D-81C2-DE66C54DC8A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{280DBC9F-7D75-435D-81C2-DE66C54DC8A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{280DBC9F-7D75-435D-81C2-DE66C54DC8A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89245819-598D-4ADE-9563-9E9F6D446547}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89245819-598D-4ADE-9563-9E9F6D446547}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89245819-598D-4ADE-9563-9E9F6D446547}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89245819-598D-4ADE-9563-9E9F6D446547}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
