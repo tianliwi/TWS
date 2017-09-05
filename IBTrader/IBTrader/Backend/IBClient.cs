@@ -132,6 +132,7 @@ namespace IBTrader
 
             if (tmp != null)
                 tmp(0, 0, null, e);
+            throw e;
         }
 
         void EWrapper.error(string str)

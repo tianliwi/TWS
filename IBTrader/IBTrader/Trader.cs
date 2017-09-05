@@ -16,10 +16,8 @@ namespace IBTrader
         public IBClient ibClient;
         private EReaderMonitorSignal signal;
         private EReader reader;
-        private DataTable historicalDataChunk;
         private List<HistoricalDataMessage> historicalDataList;
-        public List<FxHistoricalDataMessage> _fxHistoricalDataList;
-		public Dictionary<string, FxHistoricalDataMessage> _fxHistoricalDataDict;
+		public Dictionary<string, FxHistoricalDataEntry> _fxHistoricalDataDict;
         private bool _allHistoricalDataLoaded;
 
         delegate void MessageHandlerDelegate(IBMessage message);
@@ -28,9 +26,8 @@ namespace IBTrader
         {
             signal = new EReaderMonitorSignal();
             ibClient = new IBClient(signal);
-
-            _fxHistoricalDataList = new List<FxHistoricalDataMessage>();
-			_fxHistoricalDataDict = new Dictionary<string, FxHistoricalDataMessage>();
+            
+			_fxHistoricalDataDict = new Dictionary<string, FxHistoricalDataEntry>();
             _allHistoricalDataLoaded = false;
 
             historicalDataList = new List<HistoricalDataMessage>();
@@ -52,17 +49,12 @@ namespace IBTrader
         {
             ibClient.ClientSocket.eDisconnect();
         }
-
-        private void prepareHistoricalDataTable()
+        
+        public void GetHistoricalData(int reqId, Contract contract, string endTime, string duration, string barSize, string whatToShow)
         {
-            historicalDataChunk = new DataTable("HDChunk");
-            historicalDataChunk.Columns.Add("time", typeof(string));
-            historicalDataChunk.Columns.Add("open", typeof(double));
-            historicalDataChunk.Columns.Add("high", typeof(double));
-            historicalDataChunk.Columns.Add("low", typeof(double));
-            historicalDataChunk.Columns.Add("close", typeof(double));
-            historicalDataChunk.Columns.Add("volume", typeof(double));
+            ibClient.ClientSocket.reqHistoricalData(reqId, contract, endTime, duration, barSize, whatToShow, 1, 1, new List<TagValue>());
         }
+
         public void HandleMessage(IBMessage message)
         {
             switch (message.Type)
@@ -84,7 +76,7 @@ namespace IBTrader
 								_fxHistoricalDataDict[date].CloseAsk = b.Close;
 							}
 							else {
-								FxHistoricalDataMessage d = new FxHistoricalDataMessage();
+								FxHistoricalDataEntry d = new FxHistoricalDataEntry();
 								d.Date = date;
 								d.OpenAsk = b.Open;
 								d.HighAsk = b.High;
@@ -107,7 +99,7 @@ namespace IBTrader
 								_fxHistoricalDataDict[date].CloseBid = b.Close;
 							}
 							else {
-								FxHistoricalDataMessage d = new FxHistoricalDataMessage();
+                                FxHistoricalDataEntry d = new FxHistoricalDataEntry();
 								d.Date = date;
 								d.OpenBid = b.Open;
 								d.HighBid = b.High;

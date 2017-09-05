@@ -14,13 +14,27 @@ namespace HistoricalDataDownloader
     {
         static void Main(string[] args)
         {
-			//testData();
-			//return;
+            //testData();
+            //return;
+            try
+            {
+                Trader trader = new Trader();
+                trader.Connect();
 
-            Trader trader = new Trader();
-            trader.Connect();
+                string _enddate = "20170831";
+                GetHistoricalDataForADay(trader, _enddate);
+                Console.ReadKey();
+                trader.Disconnect();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
 
-            string _enddate = "20170831";
+        static void GetHistoricalDataForADay(Trader trader, string _enddate)
+        {
+
 
             DateTime _startTime = DateTime.SpecifyKind(DateTime.ParseExact(_enddate, "yyyyMMdd", null), DateTimeKind.Local);
             DateTime _endTime = _startTime + new TimeSpan(1, 0, 0, 0);          // one day later
@@ -28,20 +42,19 @@ namespace HistoricalDataDownloader
 
             long space = 28800;
 
-            long totalRequests = (long)sec / space;           // one request is 30 min, totalRequests = 48
-            TimeSpan eightHours = new TimeSpan((int)space/3600, 0, 0);
+            long totalRequests = (long)sec / space;
+            TimeSpan eightHours = new TimeSpan((int)space / 3600, 0, 0);
 
             DateTime s = _startTime;
             DateTime t = _startTime + eightHours;
             string sym = "EUR";
 
-			Console.WriteLine("Requesting historical bars for {0} on {1}...", sym, _startTime.ToShortDateString());
+            Console.WriteLine("Requesting historical bars for {0} on {1}...", sym, _startTime.ToShortDateString());
             for (int i = 0; i < totalRequests; i++)
             {
                 Console.WriteLine("Request #: " + (i + 1).ToString() + "/" + totalRequests);
-                // 1 = 1 second
-                Contract contract = new Contract();
 
+                Contract contract = new Contract();
                 string duration = space.ToString() + " S";
                 string barSize = "1 min";
                 contract.Symbol = sym;
@@ -49,29 +62,24 @@ namespace HistoricalDataDownloader
                 contract.Exchange = "IDEALPRO";
                 contract.Currency = "USD";
 
-				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalAsk, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "ASK", 1, 1, new List<TagValue>());
-				Thread.Sleep(10000);
-
-				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalBid, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "BID", 1, 1, new List<TagValue>());
-
-                // Do not make more than 60 historical data requests in any ten-minute period.
-                // If I have 10 names, each can only make 6 requests in ten minute;
-                // I use 5 minute for a pause; Then 24 hours takes 120 min or 1.5hour
-                // Thread.Sleep(new TimeSpan(0, 5, 0));
-                // wait 10 secs
+                trader.GetHistoricalData((int)MessageType.FxHistoricalAsk, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "ASK");
                 Thread.Sleep(10000);
+
+                trader.GetHistoricalData((int)MessageType.FxHistoricalBid, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "BID");
+                Thread.Sleep(10000);
+
                 s += eightHours;
                 t += eightHours;
             }
 
-			string projectPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase)));
-			Console.WriteLine(projectPath);
-			File.WriteAllLines("/Users/tianli8012/GitHub/TWS/nodup.csv", trader._fxHistoricalDataDict.Distinct().Select(i => i.Value.ToString()));
-
-			Console.WriteLine("done.");
-            Console.ReadKey();
-            trader.Disconnect();
+            var filteredList = trader._fxHistoricalDataDict.Where(i => i.Key.Substring(0, 8) == _enddate).Select(i => i.Value.ToString());
+            if (filteredList.Count() > 0) {
+                File.WriteAllLines("E:/GitHub/TWS/Data/" + sym + "/2017/Daily/" + _enddate + "_M1.csv", filteredList);
+            }
+            trader._fxHistoricalDataDict.Clear();
+            Console.WriteLine("done.");
         }
+
         static void testData()
         {
 
@@ -93,9 +101,9 @@ namespace HistoricalDataDownloader
 				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalBid, contract, endTime, duration, barSize, "BID", 0, 1, new List<TagValue>());
 
                 Console.ReadKey();
-                foreach(var s in trader._fxHistoricalDataList)
+                foreach(var s in trader._fxHistoricalDataDict)
                 {
-					Console.WriteLine(s.ToString());
+					Console.WriteLine(s.Value.ToString());
                 }
                 trader.Disconnect();
             }

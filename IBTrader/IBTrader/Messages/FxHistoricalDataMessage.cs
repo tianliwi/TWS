@@ -1,7 +1,7 @@
 ﻿using System;
 namespace IBTrader
 {
-	public class FxHistoricalDataMessage : IBMessage
+	public class FxHistoricalDataEntry
 	{
 		public string Date;
 		public double OpenAsk;
@@ -13,7 +13,7 @@ namespace IBTrader
 		public double CloseAsk;
 		public double CloseBid;
 		public double Volume;
-		public FxHistoricalDataMessage()
+		public FxHistoricalDataEntry()
 		{
 			Volume = -1;
 		}
