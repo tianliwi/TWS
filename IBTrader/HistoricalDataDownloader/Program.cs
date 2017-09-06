@@ -15,14 +15,15 @@ namespace HistoricalDataDownloader
         static void Main(string[] args)
         {
             //testData();
-            //return;
+            JoinDailyData("EUR");
+            return;
             try
             {
                 Trader trader = new Trader();
                 trader.Connect();
 
                 string _enddate = "20170831";
-                GetHistoricalDataForADay(trader, _enddate);
+                GetHistoricalDataForADay(trader, _enddate, "EUR");
                 Console.ReadKey();
                 trader.Disconnect();
             }
@@ -32,7 +33,7 @@ namespace HistoricalDataDownloader
             }
         }
 
-        static void GetHistoricalDataForADay(Trader trader, string _enddate)
+        static void GetHistoricalDataForADay(Trader trader, string _enddate, string sym)
         {
 
 
@@ -47,7 +48,6 @@ namespace HistoricalDataDownloader
 
             DateTime s = _startTime;
             DateTime t = _startTime + eightHours;
-            string sym = "EUR";
 
             Console.WriteLine("Requesting historical bars for {0} on {1}...", sym, _startTime.ToShortDateString());
             for (int i = 0; i < totalRequests; i++)
@@ -78,6 +78,16 @@ namespace HistoricalDataDownloader
             }
             trader._fxHistoricalDataDict.Clear();
             Console.WriteLine("done.");
+        }
+
+        static void JoinDailyData(string sym)
+        {
+            string[] files = Directory.GetFiles("E:/GitHub/TWS/Data/" + sym + "/2017/Daily");
+            Console.WriteLine(files.Count());
+            foreach(string file in files)
+            {
+                File.AppendAllLines("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv", File.ReadAllLines(file));
+            }
         }
 
         static void testData()
