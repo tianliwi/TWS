@@ -14,23 +14,33 @@ namespace HistoricalDataDownloader
     {
         static void Main(string[] args)
         {
-            //testData();
-            JoinDailyData("EUR");
-            return;
+            DateTime startDate = Convert.ToDateTime("9/6/2017");
+            DateTime endDate = Convert.ToDateTime("9/7/2017");
+
             try
             {
                 Trader trader = new Trader();
                 trader.Connect();
 
-                string _enddate = "20170831";
-                GetHistoricalDataForADay(trader, _enddate, "EUR");
+                foreach (DateTime day in EachDay(startDate, endDate))
+                {
+                    string _enddate = day.ToString("yyyyMMdd");
+                    GetHistoricalDataForADay(trader, _enddate, "EUR");
+                }
+                JoinDailyData("EUR");
                 Console.ReadKey();
                 trader.Disconnect();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        static IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
+        {
+            for (var day = from.Date; day.Date < thru.Date; day = day.AddDays(1))
+                yield return day;
         }
 
         static void GetHistoricalDataForADay(Trader trader, string _enddate, string sym)
@@ -77,13 +87,15 @@ namespace HistoricalDataDownloader
                 File.WriteAllLines("E:/GitHub/TWS/Data/" + sym + "/2017/Daily/" + _enddate + "_M1.csv", filteredList);
             }
             trader._fxHistoricalDataDict.Clear();
-            Console.WriteLine("done.");
         }
 
         static void JoinDailyData(string sym)
         {
+            if(File.Exists("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv"))
+            {
+                File.Delete("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv");
+            }
             string[] files = Directory.GetFiles("E:/GitHub/TWS/Data/" + sym + "/2017/Daily");
-            Console.WriteLine(files.Count());
             foreach(string file in files)
             {
                 File.AppendAllLines("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv", File.ReadAllLines(file));
