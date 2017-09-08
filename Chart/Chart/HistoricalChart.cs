@@ -12,9 +12,9 @@ using System.Windows.Forms;
 
 namespace Chart
 {
-    public partial class Form1 : Form
+    public partial class HistoricalChart : Form
     {
-        public Form1()
+        public HistoricalChart()
         {
             InitializeComponent();
             Load += new EventHandler(Form1_Load);

@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalDataDownloader", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalDataPlot", "HistoricalDataPlot\HistoricalDataPlot.csproj", "{89245819-598D-4ADE-9563-9E9F6D446547}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalChart", "..\Chart\Chart\HistoricalChart.csproj", "{469A97FF-A7EE-4521-B134-D3472E0B4778}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackTest", "BackTest\BackTest.csproj", "{92DE10B0-3411-47A8-88EA-8182942A7EE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{89245819-598D-4ADE-9563-9E9F6D446547}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89245819-598D-4ADE-9563-9E9F6D446547}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89245819-598D-4ADE-9563-9E9F6D446547}.Release|Any CPU.Build.0 = Release|Any CPU
+		{469A97FF-A7EE-4521-B134-D3472E0B4778}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{469A97FF-A7EE-4521-B134-D3472E0B4778}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{469A97FF-A7EE-4521-B134-D3472E0B4778}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{469A97FF-A7EE-4521-B134-D3472E0B4778}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

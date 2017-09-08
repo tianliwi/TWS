@@ -1,6 +1,6 @@
 ﻿namespace Chart
 {
-    partial class Form1
+    partial class HistoricalChart
     {
         /// <summary>
         /// Required designer variable.
@@ -43,6 +43,7 @@
             legend1.Name = "Legend1";
             this.chart.Legends.Add(legend1);
             this.chart.Location = new System.Drawing.Point(0, 0);
+            this.chart.Margin = new System.Windows.Forms.Padding(300);
             this.chart.Name = "chart";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Candlestick;
@@ -56,13 +57,13 @@
             this.chart.TabIndex = 3;
             this.chart.Text = "chart1";
             // 
-            // Form1
+            // HistoricalChart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1385, 644);
             this.Controls.Add(this.chart);
-            this.Name = "Form1";
+            this.Name = "HistoricalChart";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.chart)).EndInit();
             this.ResumeLayout(false);
