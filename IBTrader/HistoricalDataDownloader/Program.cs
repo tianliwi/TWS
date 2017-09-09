@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IBApi;
 using IBTrader;
 using System.Threading;
@@ -12,11 +10,14 @@ namespace HistoricalDataDownloader
 {
     class Program
     {
+        static string yearToWork;
+
         static void Main(string[] args)
         {
-            DateTime startDate = Convert.ToDateTime("9/6/2017");
-            DateTime endDate = Convert.ToDateTime("9/7/2017");
-
+            DateTime startDate = Convert.ToDateTime("1/3/2016");
+            DateTime endDate = Convert.ToDateTime("1/1/2017");  // endDate is excluded, i.e. [startDate, endDate)
+            yearToWork = startDate.Year.ToString();
+            Console.WriteLine(yearToWork);
             try
             {
                 Trader trader = new Trader();
@@ -28,6 +29,7 @@ namespace HistoricalDataDownloader
                     GetHistoricalDataForADay(trader, _enddate, "EUR");
                 }
                 JoinDailyData("EUR");
+                Console.WriteLine("Historical data downloading completed!");
                 Console.ReadKey();
                 trader.Disconnect();
             }
@@ -84,54 +86,21 @@ namespace HistoricalDataDownloader
 
             var filteredList = trader._fxHistoricalDataDict.Where(i => i.Key.Substring(0, 8) == _enddate).Select(i => i.Value.ToString());
             if (filteredList.Count() > 0) {
-                File.WriteAllLines("E:/GitHub/TWS/Data/" + sym + "/2017/Daily/" + _enddate + "_M1.csv", filteredList);
+                File.WriteAllLines("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork  +"/Daily/" + _enddate + "_M1.csv", filteredList);
             }
             trader._fxHistoricalDataDict.Clear();
         }
 
         static void JoinDailyData(string sym)
         {
-            if(File.Exists("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv"))
+            if(File.Exists("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv"))
             {
-                File.Delete("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv");
+                File.Delete("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv");
             }
-            string[] files = Directory.GetFiles("E:/GitHub/TWS/Data/" + sym + "/2017/Daily");
+            string[] files = Directory.GetFiles("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/Daily");
             foreach(string file in files)
             {
-                File.AppendAllLines("E:/GitHub/TWS/Data/" + sym + "/2017/2017_M1.csv", File.ReadAllLines(file));
-            }
-        }
-
-        static void testData()
-        {
-
-            try
-            {
-                Trader trader = new Trader();
-                trader.Connect();
-
-                Contract contract = new Contract();
-                string endTime = "20170830  14:15:00";//"20170901  06:16:00 GMT";// DateTime.Now.ToString("yyyyMMdd HH:mm:ss");
-
-                string duration = "900 S";
-                string barSize = "1 min";
-                contract.Symbol = "EUR";
-                contract.SecType = "CASH";
-                contract.Exchange = "IDEALPRO";
-                contract.Currency = "USD";
-
-				trader.ibClient.ClientSocket.reqHistoricalData((int)MessageType.FxHistoricalBid, contract, endTime, duration, barSize, "BID", 0, 1, new List<TagValue>());
-
-                Console.ReadKey();
-                foreach(var s in trader._fxHistoricalDataDict)
-                {
-					Console.WriteLine(s.Value.ToString());
-                }
-                trader.Disconnect();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
+                File.AppendAllLines("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv", File.ReadAllLines(file));
             }
         }
     }

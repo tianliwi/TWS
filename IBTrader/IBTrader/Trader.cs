@@ -18,7 +18,6 @@ namespace IBTrader
         private EReader reader;
         private List<HistoricalDataMessage> historicalDataList;
 		public Dictionary<string, FxHistoricalDataEntry> _fxHistoricalDataDict;
-        private bool _allHistoricalDataLoaded;
 
         delegate void MessageHandlerDelegate(IBMessage message);
 
@@ -28,7 +27,6 @@ namespace IBTrader
             ibClient = new IBClient(signal);
             
 			_fxHistoricalDataDict = new Dictionary<string, FxHistoricalDataEntry>();
-            _allHistoricalDataLoaded = false;
 
             historicalDataList = new List<HistoricalDataMessage>();
 
