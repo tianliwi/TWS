@@ -20,7 +20,7 @@ namespace BackTest
         public DateTime tickMinDate;
         public DateTime tickMaxDate;
         public string[] tickFiles;
-        public Dictionary<DateTime, FxHistoricalDataEntry> fxM1Dict = new Dictionary<DateTime, FxHistoricalDataEntry>();
+        public SortedList<DateTime, FxHistoricalDataEntry> fxM1Dict = new SortedList<DateTime, FxHistoricalDataEntry>();
 
         public BackTestEngine()
         {
@@ -55,25 +55,23 @@ namespace BackTest
         public void Start()
         {
             _playthread.RunWorkerAsync();
-
-            while (true)
+            DateTime lastDate = fxM1Dict.First().Key;
+            foreach(var data in fxM1Dict)
             {
-                string s;
-                if (cq.TryDequeue(out s))
+                DateTime curDate = data.Key;
+                TimeSpan ts = curDate - lastDate;
+                if(ts.Hours==4 && ts.Minutes==0 && ts.Seconds == 0)
                 {
-                    Console.WriteLine(s);
+                    lastDate = curDate;
+                    Console.WriteLine(curDate.ToString());
+                    Thread.Sleep(100);
                 }
             }
-
         }
 
         protected virtual void Play(object sender, DoWorkEventArgs e)
         {
-            for(int i=0;i<10;i++)
-            {
-                cq.Enqueue(Thread.CurrentThread.ManagedThreadId.ToString() + ", " + i.ToString());
-                Thread.Sleep(500);
-            }
+            //TODO
         }
 
         public FxHistoricalDataEntry GetTickData(DateTime dateTime)
