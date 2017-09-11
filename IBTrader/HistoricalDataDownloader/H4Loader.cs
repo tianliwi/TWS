@@ -13,8 +13,9 @@ namespace HistoricalDataDownloader
         private string yearToWork;
         private string _startDate;
         private string _endDate;
+        private string _symbol;
 
-        public H4Loader(string startDate, string endDate)
+        public H4Loader(string startDate, string endDate, string symbol)
         {
             _startDate = startDate;
             if (string.IsNullOrEmpty(endDate))
@@ -24,12 +25,13 @@ namespace HistoricalDataDownloader
             {
                 _endDate = endDate;
             }
+            _symbol = symbol;
         }
         public void LoadM1Data()
         {
             DateTime startDate = Convert.ToDateTime(_startDate);
             DateTime endDate = Convert.ToDateTime(_endDate);  // endDate is excluded, i.e. [startDate, endDate)
-            Console.WriteLine("Starting H4 historical data downloading from {0} to {1}.", startDate.ToShortDateString(), endDate.AddDays(-1).ToShortDateString());
+            Console.WriteLine("Starting H4 {2} historical data downloading from {0} to {1}.", startDate.ToShortDateString(), endDate.AddDays(-1).ToShortDateString(), _symbol);
             yearToWork = startDate.Year.ToString();
             try
             {
@@ -39,9 +41,9 @@ namespace HistoricalDataDownloader
                 foreach (DateTime day in EachMonth(startDate, endDate))
                 {
                     string _enddate = day.ToString("yyyyMMdd");
-                    GetHistoricalDataForAMonth(trader, _enddate, "EUR");
+                    GetHistoricalDataForAMonth(trader, _enddate, _symbol);
                 }
-                JoinDailyData("EUR");
+                JoinDailyData(_symbol);
                 Console.WriteLine("Historical data downloading completed!");
                 Console.ReadKey();
                 trader.Disconnect();
