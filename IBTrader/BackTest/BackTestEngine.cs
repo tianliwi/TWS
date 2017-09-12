@@ -60,18 +60,36 @@ namespace BackTest
                 if (dataRepo.DataH4.ContainsKey(tickCur))
                 {
                     barH4.AddFirst(dataRepo.DataH4[tickCur]);
-                    if (h4Cnt++ >= 19)
+                    if (orderOpened && !orderClosed)
                     {
-                        R = getLastHigh(12) - getLastLow(12);
-                        R2 = getLastHigh(18) - getLastLow(18);
-                        if (true)//(R2 >= 0.013 && R2 <= 0.019)
+                        double bid = barH4.First.Value.OpenBid;
+                        if (bid > open)
                         {
-                            open = barH4.First.Value.OpenAsk - R * 0.12;
-                            sl = -0.0005;
-                            tp = R * 0.32;
-                            orderOpened = false;
-                            orderClosed = false;
-                            Console.WriteLine("At {0}, put order with limit price {1}, stoploss {2}, take profit {3}.", tickCur, open, sl, tp);
+                            profit += bid - open;
+                            winNum++;
+                        } else if(bid < open)
+                        {
+                            loss += open - bid;
+                            loseNum++;
+                        }
+                    }
+                    if (h4Cnt++ >= 25)
+                    {
+                        double high = getLastHigh(48);
+                        double low = getLastLow(48);
+                        if (high > low)
+                        {
+                            R = high - low;
+                            R2 = getLastHigh(72) - getLastLow(72);
+                            if (R2 >= 0.013 && R2 <= 0.019)
+                            {
+                                open = barH4.First.Value.OpenAsk - R * 0.12;
+                                sl = -0.005;
+                                tp = R * 0.12;
+                                orderOpened = false;
+                                orderClosed = false;
+                                //Console.WriteLine("At {0}, put order with limit price {1}, stoploss {2}, take profit {3}.", tickCur, open, sl, tp);
+                            }
                         }
                     }
                 }
@@ -82,7 +100,7 @@ namespace BackTest
                     FxHistoricalDataEntry cur = barM1.First.Value;
                     if(!orderOpened)
                     {
-                        if ((cur.LowBid < open) && cur.HighBid > open)
+                        if ((cur.LowAsk < open) && cur.HighAsk > open)
                         {
                             orderOpened = true;
                             Console.WriteLine("Order placed at {0}.", tickCur);
@@ -90,20 +108,18 @@ namespace BackTest
                     }
                     if(orderOpened)
                     {
-                        if (cur.LowBid < open + tp && cur.HighBid > open + tp)
-                        {
-                            profit += tp;
-                            Console.WriteLine("Take profit at {0}.", tickCur);
-                            orderClosed = true;
-                            winNum++;
-                        }
-
                         if (cur.LowBid < open + sl && cur.HighBid > open + sl)
                         {
                             loss += sl;
                             Console.WriteLine("Stop loss at {0}.", tickCur);
                             orderClosed = true;
                             loseNum++;
+                        } else if (cur.LowBid < open + tp && cur.HighBid > open + tp)
+                        {
+                            profit += tp;
+                            Console.WriteLine("Take profit at {0}.", tickCur);
+                            orderClosed = true;
+                            winNum++;
                         }
                     }
                 }
@@ -113,26 +129,36 @@ namespace BackTest
 
         private double getLastHigh(int n)
         {
+            TimeSpan ts = new TimeSpan(-n, 0, 0);
+            DateTime t = tickCur.Add(ts);
             double res = -1;
             LinkedListNode<FxHistoricalDataEntry> node = barH4.First;
-            while(n-->0)
+            node = node.Next;
+            DateTime b = DateTime.SpecifyKind(DateTime.ParseExact(node.Value.Date, "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
+            while (b >= t)
             {
+                res = Math.Max(res, node.Value.HighAsk);
                 if (node.Next == null) break;
                 node = node.Next;
-                res = Math.Max(res, node.Value.HighAsk);
+                b = DateTime.SpecifyKind(DateTime.ParseExact(node.Value.Date, "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
             }
             return res;
         }
 
         private double getLastLow(int n)
         {
-            double res = -1;
+            TimeSpan ts = new TimeSpan(-n, 0, 0);
+            DateTime t = tickCur.Add(ts);
+            double res = 100;
             LinkedListNode<FxHistoricalDataEntry> node = barH4.First;
-            while (n-- > 0)
+            node = node.Next;
+            DateTime b = DateTime.SpecifyKind(DateTime.ParseExact(node.Value.Date, "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
+            while (b >= t)
             {
+                res = Math.Min(res, node.Value.LowAsk);
                 if (node.Next == null) break;
                 node = node.Next;
-                res = Math.Max(res, node.Value.LowAsk);
+                b = DateTime.SpecifyKind(DateTime.ParseExact(node.Value.Date, "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
             }
             return res;
         }

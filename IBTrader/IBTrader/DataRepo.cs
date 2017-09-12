@@ -20,8 +20,8 @@ namespace IBTrader
 
         public void LoadCSV()
         {
-            loadHelper(DataM1, "E:/GitHub/TWS/Data/EUR/2016/2016_M1.csv");
-            loadHelper(DataH4, "E:/GitHub/TWS/Data/EUR/2016/2016_H4.csv");
+            loadHelper(DataM1, "E:/GitHub/TWS/Data/AUD/2016/2016_M1.csv");
+            loadHelper(DataH4, "E:/GitHub/TWS/Data/AUD/2016/2016_H4.csv");
         }
 
         private void loadHelper(SortedList<DateTime, FxHistoricalDataEntry> dataList, string filename)
