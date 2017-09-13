@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="D1Loader.cs" />
+    <Compile Include="DataProcessor.cs" />
     <Compile Include="H4Loader.cs" />
     <Compile Include="M1Loader.cs" />
     <Compile Include="Program.cs" />

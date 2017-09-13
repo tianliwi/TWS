@@ -67,11 +67,15 @@ namespace BackTest
                         {
                             profit += bid - open;
                             winNum++;
+                            Console.WriteLine("Timeout with profit at {0}.", tickCur);
                         } else if(bid < open)
                         {
                             loss += open - bid;
                             loseNum++;
+                            Console.WriteLine("Timeout with loss at {0}.", tickCur);
                         }
+                        orderOpened = false;
+                        orderClosed = true;
                     }
                     if (h4Cnt++ >= 25)
                     {
@@ -103,7 +107,7 @@ namespace BackTest
                         if ((cur.LowAsk < open) && cur.HighAsk > open)
                         {
                             orderOpened = true;
-                            Console.WriteLine("Order placed at {0}.", tickCur);
+                            Console.WriteLine("\nOrder placed at {0}.", tickCur);
                         }
                     }
                     if(orderOpened)
