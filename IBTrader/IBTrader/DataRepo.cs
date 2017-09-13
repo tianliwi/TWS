@@ -11,11 +11,13 @@ namespace IBTrader
     {
         public SortedList<DateTime, FxHistoricalDataEntry> DataM1;
         public SortedList<DateTime, FxHistoricalDataEntry> DataH4;
+        public SortedList<DateTime, FxHistoricalDataEntry> DataD1;
 
         public DataRepo()
         {
             DataM1 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataH4 = new SortedList<DateTime, FxHistoricalDataEntry>();
+            DataD1 = new SortedList<DateTime, FxHistoricalDataEntry>();
         }
 
         public void LoadCSV()
@@ -26,7 +28,12 @@ namespace IBTrader
 
         public void loadM1()
         {
-            loadHelper(DataM1, "E:/GitHub/TWS/Data/AUD/2016/2016_M1.csv");
+            loadHelper(DataM1, "C:/Users/liti/Documents/TWS/Data/EUR/2016/2016_M1.csv");
+        }
+
+        public void loadD1()
+        {
+            loadHelper(DataD1, "C:/Users/liti/Documents/TWS/Data/EUR/2016/2016_D1.csv");
         }
 
         private void loadHelper(SortedList<DateTime, FxHistoricalDataEntry> dataList, string filename)
@@ -45,7 +52,7 @@ namespace IBTrader
                 entry.LowBid = Convert.ToDouble(cols[6]);
                 entry.CloseAsk = Convert.ToDouble(cols[7]);
                 entry.CloseBid = Convert.ToDouble(cols[8]);
-                dataList[DateTime.SpecifyKind(DateTime.ParseExact(cols[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local)] = entry;
+                dataList[DateTime.SpecifyKind(DateTime.ParseExact(cols[0], "yyyyMMdd HH:mm:ss", null), DateTimeKind.Local)] = entry;
             }
         }
     }

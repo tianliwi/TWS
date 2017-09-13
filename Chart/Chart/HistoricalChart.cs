@@ -18,6 +18,13 @@ namespace Chart
         {
             InitializeComponent();
             Load += new EventHandler(Form1_Load);
+            AutoSizeChanged += new EventHandler(resize);
+        }
+
+        private void resize(object sender, System.EventArgs e)
+        {
+            chart.Width = this.Width;
+            chart.Height = this.Height / 2;
         }
 
         private void Form1_Load(object sender, System.EventArgs e)
@@ -26,7 +33,7 @@ namespace Chart
         }
         private void GetData()
         {
-            var filename = @"E:/GitHub/TWS/Data/EUR/2017/2017_H4.csv";
+            var filename = @"C:\Users\liti\Documents\TWS\Data\EUR\2016\2016_D1.csv";
             string[] lines = File.ReadAllLines(filename);
             DataTable dt = new DataTable();
             dt.Columns.Add("ID", typeof(int));
@@ -43,7 +50,7 @@ namespace Chart
                 string[] col = line.Split(',');
                 DataRow row = dt.NewRow();
                 row["ID"] = lineNum++;
-                row["Date"] = DateTime.SpecifyKind(DateTime.ParseExact(col[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
+                row["Date"] = DateTime.SpecifyKind(DateTime.ParseExact(col[0], "yyyyMMdd HH:mm:ss", null), DateTimeKind.Local);
                 row["Open"] = Double.Parse(col[1]);
                 row["High"] = Double.Parse(col[3]);
                 row["Low"] = Double.Parse(col[5]);

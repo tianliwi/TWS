@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IBTrader;
+using System.IO;
 
 namespace HistoricalDataDownloader
 {
@@ -11,7 +12,7 @@ namespace HistoricalDataDownloader
     {
         public DataRepo dataRepo;
         SortedList<DateTime, FxHistoricalDataEntry> H4;
-        SortedList<DateTime, FxHistoricalDataEntry> D1;
+        List<FxHistoricalDataEntry> D1;
 
         public DateTime tickMinDate;
         public DateTime tickMaxDate;
@@ -19,6 +20,7 @@ namespace HistoricalDataDownloader
         public DataProcessor()
         {
             dataRepo = new DataRepo();
+            D1 = new List<FxHistoricalDataEntry>();
             dataRepo.loadM1();
         }
 
@@ -31,12 +33,28 @@ namespace HistoricalDataDownloader
             FxHistoricalDataEntry entry = new FxHistoricalDataEntry();
             clearEntry(entry);
 
-            while(curDate < tickMaxDate)
+            while (curDate <= tickMaxDate)
+            {
+                prevDate = curDate;
+                curDate = curDate.AddMinutes(1);
+            }
+        }
+
+        public void generateD1()
+        {
+            tickMinDate = dataRepo.DataM1.Keys.Min();
+            tickMaxDate = dataRepo.DataM1.Keys.Max();
+            DateTime curDate = tickMinDate;
+            DateTime prevDate = curDate.AddDays(-1);
+            FxHistoricalDataEntry entry = new FxHistoricalDataEntry();
+            clearEntry(entry);
+
+            while(curDate <= tickMaxDate)
             {
                 //Console.WriteLine("{0}  {1}", prevDate, curDate);
                 if (curDate.Date > prevDate.Date)
                 {
-                    if(entry.Date != "")
+                    if(entry.Date != "" && entry.OpenAsk > 0)
                     {
                         FxHistoricalDataEntry d = new FxHistoricalDataEntry();
                         d.Date = entry.Date;
@@ -48,8 +66,7 @@ namespace HistoricalDataDownloader
                         d.LowBid = entry.LowBid;
                         d.CloseAsk = entry.CloseAsk;
                         d.CloseBid = entry.CloseBid;
-                        //D1.Add(Convert.ToDateTime(d.Date), d);
-                        Console.WriteLine(d.ToString());
+                        D1.Add(d);
                     }
                     clearEntry(entry);
                     entry.Date = Convert.ToDateTime(curDate.Date).ToString("yyyyMMdd HH:mm:ss");
@@ -89,11 +106,22 @@ namespace HistoricalDataDownloader
                 prevDate = curDate;
                 curDate = curDate.AddMinutes(1);
             }
-
-            foreach(var p in D1)
+            if(entry.OpenAsk > 0)
             {
-                Console.WriteLine(p.Value.ToString());
+                FxHistoricalDataEntry d = new FxHistoricalDataEntry();
+                d.Date = entry.Date;
+                d.OpenAsk = entry.OpenAsk;
+                d.OpenBid = entry.OpenBid;
+                d.HighAsk = entry.HighAsk;
+                d.HighBid = entry.HighBid;
+                d.LowAsk = entry.LowAsk;
+                d.LowBid = entry.LowBid;
+                d.CloseAsk = entry.CloseAsk;
+                d.CloseBid = entry.CloseBid;
+                D1.Add(d);
             }
+            File.WriteAllLines(@"C:\Users\liti\Documents\TWS\Data\EUR\2016\2016_D1.csv", D1.Select(i => i.ToString()));
+            Console.WriteLine("done");
         }
 
         public void clearEntry(FxHistoricalDataEntry entry)
