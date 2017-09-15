@@ -12,32 +12,32 @@ namespace IBTrader
         public SortedList<DateTime, FxHistoricalDataEntry> DataM1;
         public SortedList<DateTime, FxHistoricalDataEntry> DataH4;
         public SortedList<DateTime, FxHistoricalDataEntry> DataD1;
+        private string symbol;
 
-        public DataRepo()
+        public DataRepo(string symbol)
         {
             DataM1 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataH4 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataD1 = new SortedList<DateTime, FxHistoricalDataEntry>();
+            this.symbol = symbol;
         }
 
         public void LoadCSV()
         {
-            loadM1();
-            loadHelper(DataH4, "E:/GitHub/TWS/Data/AUD/2016/2016_H4.csv");
+            LoadOneCSV(DataD1, "2016", "D1");
         }
 
-        public void loadM1()
+        public void LoadOneCSV(SortedList<DateTime, FxHistoricalDataEntry> list, string year, string resolution)
         {
-            loadHelper(DataM1, "C:/Users/liti/Documents/TWS/Data/EUR/2016/2016_M1.csv");
-        }
-
-        public void loadD1()
-        {
-            loadHelper(DataD1, "C:/Users/liti/Documents/TWS/Data/EUR/2016/2016_D1.csv");
+            loadHelper(list, Constants.BaseDir + symbol + "/" + year + "/" + year + "_" + resolution + ".csv");
         }
 
         private void loadHelper(SortedList<DateTime, FxHistoricalDataEntry> dataList, string filename)
         {
+            if(!File.Exists(filename))
+            {
+                throw new IOException("Cannot find file " + filename);
+            }
             string[] lines = File.ReadAllLines(filename);
             foreach (string line in lines)
             {
@@ -52,7 +52,7 @@ namespace IBTrader
                 entry.LowBid = Convert.ToDouble(cols[6]);
                 entry.CloseAsk = Convert.ToDouble(cols[7]);
                 entry.CloseBid = Convert.ToDouble(cols[8]);
-                dataList[DateTime.SpecifyKind(DateTime.ParseExact(cols[0], "yyyyMMdd HH:mm:ss", null), DateTimeKind.Local)] = entry;
+                dataList[DateTime.SpecifyKind(DateTime.ParseExact(cols[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local)] = entry;
             }
         }
     }

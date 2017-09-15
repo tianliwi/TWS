@@ -101,21 +101,21 @@ namespace HistoricalDataDownloader
             var filteredList = trader._fxHistoricalDataDict.Where(i => i.Key.Substring(0, 8) == _enddate).Select(i => i.Value.ToString());
             if (filteredList.Count() > 0)
             {
-                File.WriteAllLines("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/Daily/" + _enddate + "_M1.csv", filteredList);
+                File.WriteAllLines(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/Daily/" + _enddate + "_M1.csv", filteredList);
             }
             trader._fxHistoricalDataDict.Clear();
         }
 
         private void JoinDailyData(string sym)
         {
-            if (File.Exists("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv"))
+            if (File.Exists(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv"))
             {
-                File.Delete("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv");
+                File.Delete(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv");
             }
-            string[] files = Directory.GetFiles("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/Daily");
+            string[] files = Directory.GetFiles(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/Daily");
             foreach (string file in files)
             {
-                File.AppendAllLines("E:/GitHub/TWS/Data/" + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv", File.ReadAllLines(file));
+                File.AppendAllLines(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv", File.ReadAllLines(file));
             }
         }
     }

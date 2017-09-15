@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBTrader", "IBTrader\IBTrader.csproj", "{6FC5B232-2713-4742-8924-6A0190BC4A80}"
 EndProject
@@ -14,8 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalChart", "..\Chart\Chart\HistoricalChart.csproj", "{469A97FF-A7EE-4521-B134-D3472E0B4778}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackTest", "BackTest\BackTest.csproj", "{92DE10B0-3411-47A8-88EA-8182942A7EE4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalDataAnalyzer", "HistoricalDataAnalyzer\HistoricalDataAnalyzer.csproj", "{53EBA9EE-A465-4824-9561-7E8DFBC725BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +45,6 @@ Global
 		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92DE10B0-3411-47A8-88EA-8182942A7EE4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{53EBA9EE-A465-4824-9561-7E8DFBC725BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{53EBA9EE-A465-4824-9561-7E8DFBC725BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{53EBA9EE-A465-4824-9561-7E8DFBC725BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{53EBA9EE-A465-4824-9561-7E8DFBC725BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

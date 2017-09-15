@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using IBTrader;
 
 namespace Chart
 {
@@ -33,7 +34,7 @@ namespace Chart
         }
         private void GetData()
         {
-            var filename = @"C:\Users\liti\Documents\TWS\Data\EUR\2016\2016_D1.csv";
+            var filename = Constants.BaseDir + @"\EUR\2015\2015_D1.csv";
             string[] lines = File.ReadAllLines(filename);
             DataTable dt = new DataTable();
             dt.Columns.Add("ID", typeof(int));
@@ -50,7 +51,7 @@ namespace Chart
                 string[] col = line.Split(',');
                 DataRow row = dt.NewRow();
                 row["ID"] = lineNum++;
-                row["Date"] = DateTime.SpecifyKind(DateTime.ParseExact(col[0], "yyyyMMdd HH:mm:ss", null), DateTimeKind.Local);
+                row["Date"] = DateTime.SpecifyKind(DateTime.ParseExact(col[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
                 row["Open"] = Double.Parse(col[1]);
                 row["High"] = Double.Parse(col[3]);
                 row["Low"] = Double.Parse(col[5]);

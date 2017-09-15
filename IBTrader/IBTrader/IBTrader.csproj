@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backend\Constants.cs" />
     <Compile Include="Backend\MessageType.cs" />
     <Compile Include="DataRepo.cs" />
     <Compile Include="EWrapperImpl.cs" />

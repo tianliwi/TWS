@@ -15,7 +15,7 @@ namespace BackTest
     public class BackTestEngine
     {
         // run backtest
-        protected ConcurrentQueue<string> cq = new ConcurrentQueue<string>();
+        protected ConcurrentQueue<Order> orderQueue;
 
         public DateTime tickMinDate;
         public DateTime tickMaxDate;
@@ -29,9 +29,10 @@ namespace BackTest
 
         public BackTestEngine()
         {
-            dataRepo = new DataRepo();
+            dataRepo = new DataRepo("EUR");
             barM1 = new LinkedList<FxHistoricalDataEntry>();
             barH4 = new LinkedList<FxHistoricalDataEntry>();
+            orderQueue = new ConcurrentQueue<Order>();
             LoadTicks();
         }
 
@@ -54,6 +55,7 @@ namespace BackTest
             int winNum = 0;
             int loseNum = 0;
             int h4Cnt = 0;
+            Order order = new Order();
             while (tickCur < tickMaxDate)
             {
                 Play();

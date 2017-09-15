@@ -13,13 +13,10 @@ namespace HistoricalDataDownloader
 
         static void Main(string[] args)
         {
-            //M1Loader m1Loader = new M1Loader("1/1/2016", "1/1/2017", "AUD");
-            //m1Loader.LoadM1Data();
-            //H4Loader h4Loader = new H4Loader("1/1/2016", "1/1/2017", "AUD");
-            //H4Loader h4Loader = new H4Loader("1/1/2017", "");
-            //h4Loader.LoadM1Data();
-            DataProcessor dataProc = new DataProcessor();
-            dataProc.generateData();
+            M1Loader m1Loader = new M1Loader("2/23/2013", "1/1/2014", "EUR");
+            m1Loader.LoadM1Data();
+            //DataProcessor dataProc = new DataProcessor("2016");
+            //dataProc.generateData();
         }
     }
 }

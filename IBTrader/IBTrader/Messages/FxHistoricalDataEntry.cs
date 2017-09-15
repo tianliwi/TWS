@@ -13,6 +13,8 @@ namespace IBTrader
 		public double CloseAsk;
 		public double CloseBid;
 		public double Volume;
+        public string EndDate;
+
 		public FxHistoricalDataEntry()
 		{
 			Volume = -1;

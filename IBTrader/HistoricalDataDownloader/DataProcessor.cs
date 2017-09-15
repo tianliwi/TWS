@@ -13,15 +13,21 @@ namespace HistoricalDataDownloader
         public DataRepo dataRepo;
         SortedList<DateTime, FxHistoricalDataEntry> H4;
         List<FxHistoricalDataEntry> D1;
+        private string year;
 
         public DateTime tickMinDate;
         public DateTime tickMaxDate;
 
-        public DataProcessor()
+        private string[] timeSlots = {
+                "00:00:00", "04:00:00", "08:00:00",
+                "12:00:00", "16:00:00", "20:00:00"};
+
+        public DataProcessor(string year)
         {
-            dataRepo = new DataRepo();
+            this.year = year;
+            dataRepo = new DataRepo("EUR");
             D1 = new List<FxHistoricalDataEntry>();
-            dataRepo.loadM1();
+            dataRepo.LoadOneCSV(dataRepo.DataM1, this.year, "M1");
         }
 
         public void generateData()
@@ -35,9 +41,33 @@ namespace HistoricalDataDownloader
 
             while (curDate <= tickMaxDate)
             {
+                if(!dataRepo.DataM1.ContainsKey(curDate))
+                {
+                    curDate = curDate.AddMinutes(1);
+                    continue;
+                }
+                if (prevDate.AddMinutes(1) != curDate)
+                {
+                    Console.WriteLine("{0}   {1}   {2}", prevDate, curDate, (TimeSpan)(curDate-prevDate));
+                }
+                if (getH4Slot(prevDate) != getH4Slot(curDate))
+                {
+                    //Console.WriteLine("{2} {0} {1}", curDate, timeSlots[getH4Slot(curDate)], prevDate);
+                }
                 prevDate = curDate;
                 curDate = curDate.AddMinutes(1);
             }
+        }
+
+        public int getH4Slot(DateTime dt)
+        {
+            string t = dt.TimeOfDay.ToString();
+            for(int k=5; k>=0; k--)
+            {
+                int cmp = string.Compare(t, timeSlots[k]);
+                if (cmp >= 0) return k;
+            }
+            return 0;
         }
 
         public void generateD1()
@@ -69,7 +99,7 @@ namespace HistoricalDataDownloader
                         D1.Add(d);
                     }
                     clearEntry(entry);
-                    entry.Date = Convert.ToDateTime(curDate.Date).ToString("yyyyMMdd HH:mm:ss");
+                    entry.Date = Convert.ToDateTime(curDate.Date).ToString("yyyyMMdd  HH:mm:ss");
                 }
                 if (!dataRepo.DataM1.ContainsKey(curDate))
                 {
@@ -120,7 +150,7 @@ namespace HistoricalDataDownloader
                 d.CloseBid = entry.CloseBid;
                 D1.Add(d);
             }
-            File.WriteAllLines(@"C:\Users\liti\Documents\TWS\Data\EUR\2016\2016_D1.csv", D1.Select(i => i.ToString()));
+            File.WriteAllLines(Constants.BaseDir + "EUR/" + year + "/" + year +"_D1.csv", D1.Select(i => i.ToString()));
             Console.WriteLine("done");
         }
 
