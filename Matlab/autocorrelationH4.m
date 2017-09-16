@@ -1,5 +1,7 @@
 clear all
 
+filename = 'E:\GitHub\TWS\Data\EUR\2011\2011_H4.csv';
+data11 = csvread(filename,0,1);
 filename = 'E:\GitHub\TWS\Data\EUR\2012\2012_H4.csv';
 data12 = csvread(filename,0,1);
 filename = 'E:\GitHub\TWS\Data\EUR\2013\2013_H4.csv';
@@ -14,7 +16,7 @@ filename = 'E:\GitHub\TWS\Data\EUR\2017\2017_H4.csv';
 data17 = csvread(filename,0,1);
 
 %join data
-data = [data12; data13; data14; data15; data16; data17];
+data = [data11; data12; data13; data14; data15; data16; data17];
 
 %daily high - daily low
 range = (data(:,3)+data(:,4))/2-(data(:,5)+data(:,6))/2;
