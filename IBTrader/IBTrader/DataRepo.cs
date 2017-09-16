@@ -13,18 +13,22 @@ namespace IBTrader
         public SortedList<DateTime, FxHistoricalDataEntry> DataH4;
         public SortedList<DateTime, FxHistoricalDataEntry> DataD1;
         private string symbol;
+        private string year;
 
-        public DataRepo(string symbol)
+        public DataRepo(string symbol, string year)
         {
             DataM1 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataH4 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataD1 = new SortedList<DateTime, FxHistoricalDataEntry>();
             this.symbol = symbol;
+            this.year = year;
         }
 
         public void LoadCSV()
         {
-            LoadOneCSV(DataD1, "2016", "D1");
+            LoadOneCSV(DataD1, year, "D1");
+            LoadOneCSV(DataH4, year, "H4");
+            LoadOneCSV(DataM1, year, "M1");
         }
 
         public void LoadOneCSV(SortedList<DateTime, FxHistoricalDataEntry> list, string year, string resolution)

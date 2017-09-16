@@ -11,7 +11,7 @@ namespace HistoricalDataDownloader
     public class DataProcessor
     {
         public DataRepo dataRepo;
-        SortedList<DateTime, FxHistoricalDataEntry> H4;
+        List<FxHistoricalDataEntry> H4;
         List<FxHistoricalDataEntry> D1;
         private string year;
 
@@ -25,12 +25,80 @@ namespace HistoricalDataDownloader
         public DataProcessor(string year)
         {
             this.year = year;
-            dataRepo = new DataRepo("EUR");
+            dataRepo = new DataRepo("EUR", this.year);
             D1 = new List<FxHistoricalDataEntry>();
+            H4 = new List<FxHistoricalDataEntry>();
+            
             dataRepo.LoadOneCSV(dataRepo.DataM1, this.year, "M1");
         }
 
-        public void generateData()
+        public void generateH4()
+        {
+            tickMinDate = dataRepo.DataM1.Keys.Min();
+            tickMaxDate = dataRepo.DataM1.Keys.Max();
+            DateTime curDate = tickMinDate;
+            DateTime prevDate = curDate;
+            FxHistoricalDataEntry entry = new FxHistoricalDataEntry();
+            clearEntry(entry);
+
+            while (curDate <= tickMaxDate)
+            {
+                if (!dataRepo.DataM1.ContainsKey(curDate))
+                {
+                    curDate = curDate.AddMinutes(1);
+                    continue;
+                }
+                FxHistoricalDataEntry cur = dataRepo.DataM1[curDate];
+                if (entry.OpenAsk < 0)
+                {
+                    entry.OpenAsk = cur.OpenAsk;
+                    entry.Date = Convert.ToDateTime(curDate).ToString("yyyyMMdd  HH:mm:ss");
+                }
+                if (entry.OpenBid < 0)
+                {
+                    entry.OpenBid = cur.OpenBid;
+                }
+                if (entry.HighAsk < cur.HighAsk)
+                {
+                    entry.HighAsk = cur.HighAsk;
+                }
+                if (entry.HighBid < cur.HighBid)
+                {
+                    entry.HighBid = cur.HighBid;
+                }
+                if (entry.LowAsk > cur.LowAsk)
+                {
+                    entry.LowAsk = cur.LowAsk;
+                }
+                if (entry.LowBid > cur.LowBid)
+                {
+                    entry.LowBid = cur.LowBid;
+                }
+                prevDate = curDate;
+                curDate = curDate.AddMinutes(1);
+                if (getH4Slot(prevDate) != getH4Slot(curDate))
+                {
+                    FxHistoricalDataEntry d = new FxHistoricalDataEntry();
+                    d.Date = entry.Date;
+                    d.OpenAsk = entry.OpenAsk;
+                    d.OpenBid = entry.OpenBid;
+                    d.HighAsk = entry.HighAsk;
+                    d.HighBid = entry.HighBid;
+                    d.LowAsk = entry.LowAsk;
+                    d.LowBid = entry.LowBid;
+                    d.CloseAsk = cur.CloseAsk;
+                    d.CloseBid = cur.CloseBid;
+                    d.EndDate = Convert.ToDateTime(prevDate).ToString("yyyyMMdd  HH:mm:ss");
+                    H4.Add(d);
+                    clearEntry(entry);
+                    //Console.WriteLine("{2} {0} {1}", curDate, timeSlots[getH4Slot(curDate)], prevDate);
+                }
+            }
+            File.WriteAllLines(Constants.BaseDir + "EUR/" + year + "/" + year + "_H4.csv", H4.Select(i => i.ToString()));
+            Console.WriteLine("done");
+        }
+
+        public void CheckData()
         {
             tickMinDate = dataRepo.DataM1.Keys.Min();
             tickMaxDate = dataRepo.DataM1.Keys.Max();
@@ -48,12 +116,26 @@ namespace HistoricalDataDownloader
                 }
                 if (prevDate.AddMinutes(1) != curDate)
                 {
-                    Console.WriteLine("{0}   {1}   {2}", prevDate, curDate, (TimeSpan)(curDate-prevDate));
+                    Console.WriteLine("Discontinous date: {0}   {1}   {2}", prevDate, curDate, (TimeSpan)(curDate-prevDate));
                 }
+                FxHistoricalDataEntry temp = dataRepo.DataM1[curDate];
+                if (string.IsNullOrEmpty(temp.Date))
+                {
+                    Console.WriteLine("Found empty date at {0}: {1}", curDate, temp.ToString());
+                }
+                if (temp.OpenAsk == 0 || temp.OpenBid == 0 ||
+                    temp.HighAsk == 0 || temp.HighBid == 0 ||
+                    temp.LowAsk == 0 || temp.LowBid ==0 ||
+                    temp.CloseAsk ==0 || temp.CloseBid == 0)
+                {
+                    Console.WriteLine("Found empty price at {0}: {1}", curDate, temp.ToString());
+                }
+                /*
                 if (getH4Slot(prevDate) != getH4Slot(curDate))
                 {
-                    //Console.WriteLine("{2} {0} {1}", curDate, timeSlots[getH4Slot(curDate)], prevDate);
+                    Console.WriteLine("{2} {0} {1}", curDate, timeSlots[getH4Slot(curDate)], prevDate);
                 }
+                */
                 prevDate = curDate;
                 curDate = curDate.AddMinutes(1);
             }

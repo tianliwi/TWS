@@ -26,12 +26,12 @@ namespace HistoricalDataDownloader
                 _endDate = endDate;
             }
             _symbol = symbol;
+            yearToWork = Convert.ToDateTime(_startDate).Year.ToString();
         }
         public void LoadM1Data()
         {
             DateTime startDate = Convert.ToDateTime(_startDate);
             DateTime endDate = Convert.ToDateTime(_endDate);  // endDate is excluded, i.e. [startDate, endDate)
-            yearToWork = startDate.Year.ToString();
             try
             {
                 Trader trader = new Trader();
@@ -98,7 +98,9 @@ namespace HistoricalDataDownloader
                 t += eightHours;
             }
 
-            var filteredList = trader._fxHistoricalDataDict.Where(i => i.Key.Substring(0, 8) == _enddate).Select(i => i.Value.ToString());
+            var filteredList = trader._fxHistoricalDataDict.Where(i => i.Key.Substring(0, 8) == _enddate)
+                .Where(i=> i.Value.OpenAsk * i.Value.OpenBid * i.Value.HighAsk * i.Value.HighBid * i.Value.LowAsk * i.Value.LowBid * i.Value.CloseAsk * i.Value.CloseBid >0)
+                .Select(i => i.Value.ToString());
             if (filteredList.Count() > 0)
             {
                 File.WriteAllLines(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/Daily/" + _enddate + "_M1.csv", filteredList);
@@ -106,7 +108,7 @@ namespace HistoricalDataDownloader
             trader._fxHistoricalDataDict.Clear();
         }
 
-        private void JoinDailyData(string sym)
+        public void JoinDailyData(string sym)
         {
             if (File.Exists(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv"))
             {
