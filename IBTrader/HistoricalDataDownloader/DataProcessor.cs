@@ -19,20 +19,20 @@ namespace HistoricalDataDownloader
         public DateTime tickMaxDate;
 
         private string[] timeSlots = {
-                "00:00:00", "04:00:00", "08:00:00",
-                "12:00:00", "16:00:00", "20:00:00"};
+                "02:00:00", "06:00:00", "10:00:00",
+                "14:00:00", "18:00:00", "22:00:00"};
 
-        public DataProcessor(string year)
+        public DataProcessor(string symbol, string year)
         {
             this.year = year;
-            dataRepo = new DataRepo("EUR", this.year);
+            dataRepo = new DataRepo(symbol, this.year);
             D1 = new List<FxHistoricalDataEntry>();
             H4 = new List<FxHistoricalDataEntry>();
             
             dataRepo.LoadOneCSV(dataRepo.DataM1, this.year, "M1");
         }
 
-        public void generateH4()
+        public void generateH4(string symbol)
         {
             tickMinDate = dataRepo.DataM1.Keys.Min();
             tickMaxDate = dataRepo.DataM1.Keys.Max();
@@ -40,7 +40,6 @@ namespace HistoricalDataDownloader
             DateTime prevDate = curDate;
             FxHistoricalDataEntry entry = new FxHistoricalDataEntry();
             clearEntry(entry);
-
             while (curDate <= tickMaxDate)
             {
                 if (!dataRepo.DataM1.ContainsKey(curDate))
@@ -52,7 +51,7 @@ namespace HistoricalDataDownloader
                 if (entry.OpenAsk < 0)
                 {
                     entry.OpenAsk = cur.OpenAsk;
-                    entry.openTime = Convert.ToDateTime(curDate).ToString("yyyyMMdd  HH:mm:ss");
+                    entry.openTime = Trader.Date2Rfc(curDate);
                 }
                 if (entry.OpenBid < 0)
                 {
@@ -80,6 +79,7 @@ namespace HistoricalDataDownloader
                 {
                     FxHistoricalDataEntry d = new FxHistoricalDataEntry();
                     d.openTime = entry.openTime;
+                    d.closeTime = Trader.Date2Rfc(prevDate);
                     d.OpenAsk = entry.OpenAsk;
                     d.OpenBid = entry.OpenBid;
                     d.HighAsk = entry.HighAsk;
@@ -88,13 +88,11 @@ namespace HistoricalDataDownloader
                     d.LowBid = entry.LowBid;
                     d.CloseAsk = cur.CloseAsk;
                     d.CloseBid = cur.CloseBid;
-                    //d.EndDate = Convert.ToDateTime(prevDate).ToString("yyyyMMdd  HH:mm:ss");
                     H4.Add(d);
                     clearEntry(entry);
-                    //Console.WriteLine("{2} {0} {1}", curDate, timeSlots[getH4Slot(curDate)], prevDate);
                 }
             }
-            File.WriteAllLines(Constants.BaseDir + "EUR/" + year + "/" + year + "_H4.csv", H4.Select(i => i.ToString()));
+            File.WriteAllLines(Constants.BaseDir + symbol + "/" + year + "_H4.csv", H4.Select(i => i.ToString()));
             Console.WriteLine("done");
         }
 
@@ -143,7 +141,9 @@ namespace HistoricalDataDownloader
 
         public int getH4Slot(DateTime dt)
         {
-            string t = dt.TimeOfDay.ToString();
+            string t = dt.ToLocalTime().TimeOfDay.ToString();
+            int c = string.Compare(t, timeSlots[0]);
+            if (c < 0) return 5;
             for(int k=5; k>=0; k--)
             {
                 int cmp = string.Compare(t, timeSlots[k]);
@@ -152,93 +152,47 @@ namespace HistoricalDataDownloader
             return 0;
         }
 
-        public void generateD1()
+        public void generateD1(string symbol)
         {
-            tickMinDate = dataRepo.DataM1.Keys.Min();
-            tickMaxDate = dataRepo.DataM1.Keys.Max();
-            DateTime curDate = tickMinDate;
-            DateTime prevDate = curDate.AddDays(-1);
-            FxHistoricalDataEntry entry = new FxHistoricalDataEntry();
-            clearEntry(entry);
-
-            while(curDate <= tickMaxDate)
+            string[] files = Directory.GetFiles(Constants.BaseDir + symbol + "/" + year);
+            foreach(string file in files)
             {
-                //Console.WriteLine("{0}  {1}", prevDate, curDate);
-                if (curDate.Date > prevDate.Date)
-                {
-                    if(entry.openTime != "" && entry.OpenAsk > 0)
-                    {
-                        FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-                        d.openTime = entry.openTime;
-                        d.OpenAsk = entry.OpenAsk;
-                        d.OpenBid = entry.OpenBid;
-                        d.HighAsk = entry.HighAsk;
-                        d.HighBid = entry.HighBid;
-                        d.LowAsk = entry.LowAsk;
-                        d.LowBid = entry.LowBid;
-                        d.CloseAsk = entry.CloseAsk;
-                        d.CloseBid = entry.CloseBid;
-                        D1.Add(d);
-                    }
-                    clearEntry(entry);
-                    entry.openTime = Convert.ToDateTime(curDate.Date).ToString("yyyyMMdd  HH:mm:ss");
-                }
-                if (!dataRepo.DataM1.ContainsKey(curDate))
-                {
-                    prevDate = curDate;
-                    curDate = curDate.AddMinutes(1);
-                    continue;
-                }
-                FxHistoricalDataEntry curEntry = dataRepo.DataM1[curDate];
-
-                if (entry.OpenAsk == -1) entry.OpenAsk = curEntry.OpenAsk;
-                if (entry.OpenBid == -1) entry.OpenBid = curEntry.OpenBid;
-
-                if (entry.HighAsk < curEntry.HighAsk)
-                {
-                    entry.HighAsk = curEntry.HighAsk;
-                }
-                if (entry.HighBid < curEntry.HighBid)
-                {
-                    entry.HighBid = curEntry.HighBid;
-                }
-
-                if (entry.LowAsk > curEntry.LowAsk)
-                {
-                    entry.LowAsk = curEntry.LowAsk;
-                }
-                if (entry.LowBid > curEntry.LowBid)
-                {
-                    entry.LowBid = curEntry.LowBid;
-                }
-
-                entry.CloseAsk = curEntry.CloseAsk;
-                entry.CloseBid = curEntry.CloseBid;
-
-                prevDate = curDate;
-                curDate = curDate.AddMinutes(1);
-            }
-            if(entry.OpenAsk > 0)
-            {
+                string[] lines = File.ReadAllLines(file);
                 FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-                d.openTime = entry.openTime;
-                d.OpenAsk = entry.OpenAsk;
-                d.OpenBid = entry.OpenBid;
-                d.HighAsk = entry.HighAsk;
-                d.HighBid = entry.HighBid;
-                d.LowAsk = entry.LowAsk;
-                d.LowBid = entry.LowBid;
-                d.CloseAsk = entry.CloseAsk;
-                d.CloseBid = entry.CloseBid;
+                clearEntry(d);
+                foreach (string line in lines)
+                {
+                    string[] cols = line.Split(',');
+                    // this is the first minute bar
+                    if (string.IsNullOrEmpty(d.openTime))
+                    {
+                        d.openTime = cols[0];
+                        d.OpenAsk = Convert.ToDouble(cols[2]);
+                        d.OpenBid = Convert.ToDouble(cols[3]);
+                    }
+                    double ha = Convert.ToDouble(cols[4]);
+                    double hb = Convert.ToDouble(cols[5]);
+                    double la = Convert.ToDouble(cols[6]);
+                    double lb = Convert.ToDouble(cols[7]);
+                    d.HighAsk = Math.Max(d.HighAsk, ha);
+                    d.HighBid = Math.Max(d.HighBid, hb);
+                    d.LowAsk = Math.Min(d.LowAsk, la);
+                    d.LowBid = Math.Min(d.LowBid, lb);
+                }
+                string[] c = lines[lines.Length - 1].Split(',');
+                d.closeTime = c[0];
+                d.CloseAsk = Convert.ToDouble(c[8]);
+                d.CloseBid = Convert.ToDouble(c[9]);
                 D1.Add(d);
             }
-            File.WriteAllLines(Constants.BaseDir + "EUR/" + year + "/" + year +"_D1.csv", D1.Select(i => i.ToString()));
+            File.WriteAllLines(Constants.BaseDir + symbol + "/" + year +"_D1.csv", D1.Select(i => i.ToString()));
             Console.WriteLine("done");
         }
 
         public void clearEntry(FxHistoricalDataEntry entry)
         {
             entry.openTime = "";
+            entry.closeTime = "";
             entry.OpenAsk = -1;
             entry.OpenBid = -1;
             entry.HighAsk = -1;

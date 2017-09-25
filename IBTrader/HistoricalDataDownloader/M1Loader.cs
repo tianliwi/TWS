@@ -42,7 +42,7 @@ namespace HistoricalDataDownloader
                     string _enddate = day.AddHours(14).ToString("yyyyMMdd HH:mm:ss");
                     GetHistoricalDataForADay(trader, _enddate, _symbol);
                 }
-                //JoinDailyData(_symbol);
+                JoinDailyData(_symbol);
                 Console.WriteLine("Historical data downloading completed!");
                 Console.ReadKey();
                 trader.Disconnect();
@@ -110,9 +110,9 @@ namespace HistoricalDataDownloader
 
         public void JoinDailyData(string sym)
         {
-            if (File.Exists(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "_M1.csv"))
+            if (File.Exists(IBTrader.Constants.BaseDir + sym + @"\" + yearToWork + "_M1.csv"))
             {
-                File.Delete(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "_M1.csv");
+                File.Delete(IBTrader.Constants.BaseDir + sym + @"\" + yearToWork + "_M1.csv");
             }
             string[] files = Directory.GetFiles(IBTrader.Constants.BaseDir + sym + "/" + yearToWork);
             foreach (string file in files)

@@ -9,172 +9,139 @@ using System.ComponentModel;
 using System.Threading;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Globalization;
 
 namespace BackTest
 {
     public class BackTestEngine
     {
-        // run backtest
-        protected List<Order> orderList;
-
-        public DateTime tickMinDate;
-        public DateTime tickMaxDate;
-        public DateTime tickCur;
-
-        public string[] tickFiles;
-        private DataRepo dataRepo;
-
-        private LinkedList<FxHistoricalDataEntry> barM1;
-        private LinkedList<FxHistoricalDataEntry> barH4;
+        private DataRepo data;
+        List<BTOrder> orderList;
 
         public BackTestEngine()
         {
-            dataRepo = new DataRepo("EUR", "2012");
-            barM1 = new LinkedList<FxHistoricalDataEntry>();
-            barH4 = new LinkedList<FxHistoricalDataEntry>();
-            orderList = new List<Order>();
-            LoadTicks();
+            data = new DataRepo("AUD", "2016");
+            data.LoadCSV();
+            orderList = new List<BTOrder>();
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         }
 
-        public void LoadTicks()
+        public double Start(double a, double b)
         {
-            Console.WriteLine("Starting loading tick data...");
-            dataRepo.LoadCSV();
-            tickMinDate = dataRepo.DataM1.Keys.Min();
-            tickMaxDate = dataRepo.DataM1.Keys.Max();
-            tickCur = tickMinDate.AddMinutes(-1);
-        }
-
-        public void Start()
-        {
-            double R, open=0, tp=0, sl=0, R2;
-            bool orderOpened = false;
-            bool orderClosed = true;
-            double profit = 0;
-            double loss = 0;
-            int winNum = 0;
-            int loseNum = 0;
-            int h4Cnt = 0;
-            Order order = new Order();
-            double total = 25000;
-            while (tickCur < tickMaxDate)
+            DateTime curTime;
+            double PNL = 0;
+            int win = 0;
+            int loss = 0;
+            int id = 0;
+            orderList.Clear();
+            foreach (var h4Pair in data.DataH4)
             {
-                Play();
-                if (dataRepo.DataH4.ContainsKey(tickCur))
-                {
-                    barH4.AddFirst(dataRepo.DataH4[tickCur]);
-                    if (orderOpened && !orderClosed)
-                    {
-                        double bid = barH4.First.Value.OpenBid;
-                        if (bid > open)
-                        {
-                            profit += bid - open;
-                            total += total * profit;
-                            Console.WriteLine(total);
-                            winNum++;
-                            //Console.WriteLine("Timeout with profit at {0}.", tickCur);
-                        } else if(bid < open)
-                        {
-                            loss += open - bid;
-                            total -= total * loss;
-                            Console.WriteLine(total);
-                            loseNum++;
-                            //Console.WriteLine("Timeout with loss at {0}.", tickCur);
-                        }
-                        orderOpened = false;
-                        orderClosed = true;
-                    }
-                    if (h4Cnt++ >= 25)
-                    {
-                        double high = getLastHigh(6);
-                        double low = getLastLow(6);
-                        if (high > low)
-                        {
-                            R = high - low;
-                            R2 = getLastHigh(12) - getLastLow(12);
-                            if (R2 >= 0.013 && R2 <= 0.019)
-                            {
-                                open = barH4.First.Value.OpenAsk - R * 0.12;
-                                sl = -0.005;
-                                tp = R * 0.12;
-                                orderOpened = false;
-                                orderClosed = false;
+                curTime = h4Pair.Key;
+                var hl = getAskHighLow(data.DataH4, curTime, 12);
+                if (hl.Item1 < 0 || hl.Item2 < 0) continue;
+                //var hl2 = getAskHighLow(data.H4, curTime, 18);
+                //if (hl2.Item1 < 0 || hl2.Item2 < 0) continue;
 
-                                //Console.WriteLine("At {0}, put order with limit price {1}, stoploss {2}, take profit {3}.", tickCur, open, sl, tp);
-                            }
-                        }
-                    }
-                }
-                if(dataRepo.DataM1.ContainsKey(tickCur))
+                double R = hl.Item1 - hl.Item2;
+                //double R2 = hl2.Item1 - hl2.Item2;
+
+                BTOrder order = new BTOrder();
+                order.ID = id++;
+                order.status = BTOrderType.Pending;
+                order.enterTime = curTime;
+                order.enterPrice = h4Pair.Value.OpenAsk - R * a;
+                order.takeProfit = order.enterPrice + R * b;
+                order.stopLoss = order.enterPrice - 0.005;
+                order.size = 8000;
+                DateTime cur = curTime;
+                while (cur <= Trader.Rfc2Date(h4Pair.Value.closeTime))
                 {
-                    barM1.AddFirst(dataRepo.DataM1[tickCur]);
-                    if (orderClosed) continue;
-                    FxHistoricalDataEntry cur = barM1.First.Value;
-                    if(!orderOpened)
+                    if (!data.DataM1.ContainsKey(cur))
                     {
-                        if ((cur.LowAsk < open) && cur.HighAsk > open)
-                        {
-                            orderOpened = true;
-                            //Console.WriteLine("\nOrder placed at {0}.", tickCur);
-                        }
+                        cur = cur.AddMinutes(1);
+                        continue;
                     }
-                    if(orderOpened)
+                    double askHigh = data.DataM1[cur].HighAsk;
+                    double askLow = data.DataM1[cur].LowAsk;
+                    double bidHigh = data.DataM1[cur].HighBid;
+                    double bidLow = data.DataM1[cur].LowBid;
+                    // Open order if target enter price is below askHigh and askLow
+                    if (order.status == BTOrderType.Pending && askLow <= order.enterPrice && askHigh >= order.enterPrice)
                     {
-                        if (cur.LowBid < open + sl && cur.HighBid > open + sl)
-                        {
-                            loss += sl;
-                            total -= total * loss;
-                            //Console.WriteLine("Stop loss at {0}.", tickCur);
-                            Console.WriteLine(total);
-                            orderClosed = true;
-                            loseNum++;
-                        } else if (cur.LowBid < open + tp && cur.HighBid > open + tp)
-                        {
-                            profit += tp;
-                            total += total * profit;
-                            //Console.WriteLine("Take profit at {0}.", tickCur);
-                            Console.WriteLine(total);
-                            orderClosed = true;
-                            winNum++;
-                        }
+                        order.enterTime = cur; // update enter time
+                        order.status = BTOrderType.Open; // open order
                     }
+                    // Play to next minute if order is not opened yet
+                    if (order.status != BTOrderType.Open)
+                    {
+                        cur = cur.AddMinutes(1);
+                        continue;
+                    }
+                    // stop loss if bid is too low
+                    if (bidLow <= order.stopLoss)
+                    {
+                        order.pnl = order.size * (order.stopLoss - order.enterPrice);
+                        order.closeTime = cur;
+                        order.closeType = BTOrderCloseType.StopLoss;
+                        order.closePrice = order.stopLoss;
+                        order.status = BTOrderType.Closed;
+                        break;
+                    }
+                    else if (bidHigh >= order.takeProfit) // take profit
+                    {
+                        order.pnl = order.size * (order.takeProfit - order.enterPrice);
+                        order.closeTime = cur;
+                        order.closeType = BTOrderCloseType.TakeProfit;
+                        order.closePrice = order.takeProfit;
+                        order.status = BTOrderType.Closed;
+                        break;
+                    }
+                    cur = cur.AddMinutes(1);
+                }
+                if (order.status == BTOrderType.Open)
+                {
+                    double bidClose = h4Pair.Value.CloseBid;
+                    order.pnl = bidClose - order.enterPrice;
+                    order.closeTime = cur;
+                    order.closeType = BTOrderCloseType.TimeOut;
+                    order.closePrice = bidClose;
+                    order.status = BTOrderType.Closed;
+                }
+                if (order.status == BTOrderType.Closed)
+                {
+                    if (order.pnl > 0) win++;
+                    else if (order.pnl < 0) loss++;
+                    PNL += order.pnl;
+                    orderList.Add(order);
+                    Console.WriteLine("{0}, {1}, {2}", win, loss, order.pnl.ToString("C", CultureInfo.CurrentCulture));
                 }
             }
-            Console.WriteLine("win {0}, {1}\nlose {2},{3}", winNum, profit, loseNum, loss);
-            Console.WriteLine(total);
+            PNL -= orderList.Count * 1.0;
+            Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
+            //File.WriteAllLines(Rest.DataRootDir + @"TestResult\res.csv", orderList.Select(i => i.ToString()));
+            return PNL;
         }
-
-        private double getLastHigh(int n)
+        private Tuple<double, double> getAskHighLow(SortedList<DateTime, FxHistoricalDataEntry> list, DateTime d, int n)
         {
-            double res = -1;
-            LinkedListNode<FxHistoricalDataEntry> node = barH4.First;
-            node = node.Next;
+            if (!list.ContainsKey(d)) return Tuple.Create(-1.0, -1.0);
+            int k = list.IndexOfKey(d);
+            if (k < n) return Tuple.Create(-1.0, -1.0);
+            double high = -1.0;
+            double low = -1.0;
             while (n-- > 0)
             {
-                res = Math.Max(res, node.Value.HighAsk);
-                if (node.Next == null) break;
-                node = node.Next;
+                k--;
+                //Console.WriteLine(list.Values[k].ToString());
+                if (high < list.Values[k].HighAsk)
+                {
+                    high = list.Values[k].HighAsk;
+                }
+                if (low < 0 || low > list.Values[k].LowAsk)
+                {
+                    low = list.Values[k].LowAsk;
+                }
             }
-            return res;
-        }
-
-        private double getLastLow(int n)
-        {
-            double res = 100;
-            LinkedListNode<FxHistoricalDataEntry> node = barH4.First;
-            node = node.Next;
-            while (n-- > 0)
-            {
-                res = Math.Min(res, node.Value.LowAsk);
-                if (node.Next == null) break;
-                node = node.Next;
-            }
-            return res;
-        }
-
-        protected void Play()
-        {
-            tickCur = tickCur.AddMinutes(1);
+            return Tuple.Create(high, low);
         }
     }
 }

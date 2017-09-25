@@ -13,7 +13,8 @@ namespace BackTest
         static void Main(string[] args)
         {
             BackTestEngine backTestEngine = new BackTestEngine();
-            backTestEngine.Start();
+            double pnl = backTestEngine.Start(0.12, 0.32);
+            Console.WriteLine(pnl);
         }
     }
 }

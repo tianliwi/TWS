@@ -34,7 +34,7 @@ namespace Chart
         }
         private void GetData()
         {
-            var filename = Constants.BaseDir + @"\AUD\2016\20160103_M1.csv";
+            var filename = Constants.BaseDir + @"\AUD\2016_D1.csv";
             string[] lines = File.ReadAllLines(filename);
             DataTable dt = new DataTable();
             dt.Columns.Add("ID", typeof(int));

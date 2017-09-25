@@ -33,7 +33,7 @@ namespace IBTrader
 
         public void LoadOneCSV(SortedList<DateTime, FxHistoricalDataEntry> list, string year, string resolution)
         {
-            loadHelper(list, Constants.BaseDir + symbol + "/" + year + "/" + year + "_" + resolution + ".csv");
+            loadHelper(list, Constants.BaseDir + symbol + "/" + year + "_" + resolution + ".csv");
         }
 
         private void loadHelper(SortedList<DateTime, FxHistoricalDataEntry> dataList, string filename)
@@ -57,7 +57,7 @@ namespace IBTrader
                 entry.LowBid = Convert.ToDouble(cols[7]);
                 entry.CloseAsk = Convert.ToDouble(cols[8]);
                 entry.CloseBid = Convert.ToDouble(cols[9]);
-                dataList[DateTime.SpecifyKind(DateTime.ParseExact(cols[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local)] = entry;
+                dataList[Trader.Rfc2Date(cols[0])] = entry;
             }
         }
     }
