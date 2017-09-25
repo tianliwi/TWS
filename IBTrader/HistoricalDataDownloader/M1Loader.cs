@@ -39,10 +39,10 @@ namespace HistoricalDataDownloader
 
                 foreach (DateTime day in EachDay(startDate, endDate))
                 {
-                    string _enddate = day.ToString("yyyyMMdd");
+                    string _enddate = day.AddHours(14).ToString("yyyyMMdd HH:mm:ss");
                     GetHistoricalDataForADay(trader, _enddate, _symbol);
                 }
-                JoinDailyData(_symbol);
+                //JoinDailyData(_symbol);
                 Console.WriteLine("Historical data downloading completed!");
                 Console.ReadKey();
                 trader.Disconnect();
@@ -63,8 +63,8 @@ namespace HistoricalDataDownloader
         {
 
 
-            DateTime _startTime = DateTime.SpecifyKind(DateTime.ParseExact(_enddate, "yyyyMMdd", null), DateTimeKind.Local);
-            DateTime _endTime = _startTime + new TimeSpan(1, 0, 0, 0);          // one day later
+            DateTime _startTime = DateTime.SpecifyKind(DateTime.ParseExact(_enddate, "yyyyMMdd HH:mm:ss", null), DateTimeKind.Local);
+            DateTime _endTime = _startTime.AddDays(1);          // one day later
             double sec = _endTime.Subtract(_startTime).TotalSeconds;      // should be 24 hours or 86,400 secs
 
             long space = 28800;
@@ -88,36 +88,36 @@ namespace HistoricalDataDownloader
                 contract.Exchange = "IDEALPRO";
                 contract.Currency = "USD";
 
-                trader.GetHistoricalData((int)MessageType.FxHistoricalAsk, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "ASK");
+                trader.GetHistoricalData((int)MessageType.FxHistoricalAsk, contract, t.ToString("yyyyMMdd HH:mm:ss"), duration, barSize, "ASK");
                 Thread.Sleep(10000);
 
-                trader.GetHistoricalData((int)MessageType.FxHistoricalBid, contract, t.ToString("yyyyMMdd HH:mm:ss") + " EST", duration, barSize, "BID");
+                trader.GetHistoricalData((int)MessageType.FxHistoricalBid, contract, t.ToString("yyyyMMdd HH:mm:ss"), duration, barSize, "BID");
                 Thread.Sleep(10000);
 
                 s += eightHours;
                 t += eightHours;
             }
 
-            var filteredList = trader._fxHistoricalDataDict.Where(i => i.Key.Substring(0, 8) == _enddate)
+            var filteredList = trader._fxHistoricalDataDict.Where(i => Trader.Rfc2DateLocal(i.Key) >= _startTime)
                 .Where(i=> i.Value.OpenAsk * i.Value.OpenBid * i.Value.HighAsk * i.Value.HighBid * i.Value.LowAsk * i.Value.LowBid * i.Value.CloseAsk * i.Value.CloseBid >0)
                 .Select(i => i.Value.ToString());
             if (filteredList.Count() > 0)
             {
-                File.WriteAllLines(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/Daily/" + _enddate + "_M1.csv", filteredList);
+                File.WriteAllLines(IBTrader.Constants.BaseDir + sym + @"\" + yearToWork + @"\" + _enddate.Substring(0,8) + "_M1.csv", filteredList);
             }
             trader._fxHistoricalDataDict.Clear();
         }
 
         public void JoinDailyData(string sym)
         {
-            if (File.Exists(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv"))
+            if (File.Exists(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "_M1.csv"))
             {
-                File.Delete(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv");
+                File.Delete(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "_M1.csv");
             }
-            string[] files = Directory.GetFiles(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/Daily");
+            string[] files = Directory.GetFiles(IBTrader.Constants.BaseDir + sym + "/" + yearToWork);
             foreach (string file in files)
             {
-                File.AppendAllLines(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "/" + yearToWork + "_M1.csv", File.ReadAllLines(file));
+                File.AppendAllLines(IBTrader.Constants.BaseDir + sym + "/" + yearToWork + "_M1.csv", File.ReadAllLines(file));
             }
         }
     }

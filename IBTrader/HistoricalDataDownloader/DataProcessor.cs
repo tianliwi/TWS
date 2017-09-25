@@ -52,7 +52,7 @@ namespace HistoricalDataDownloader
                 if (entry.OpenAsk < 0)
                 {
                     entry.OpenAsk = cur.OpenAsk;
-                    entry.Date = Convert.ToDateTime(curDate).ToString("yyyyMMdd  HH:mm:ss");
+                    entry.openTime = Convert.ToDateTime(curDate).ToString("yyyyMMdd  HH:mm:ss");
                 }
                 if (entry.OpenBid < 0)
                 {
@@ -79,7 +79,7 @@ namespace HistoricalDataDownloader
                 if (getH4Slot(prevDate) != getH4Slot(curDate))
                 {
                     FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-                    d.Date = entry.Date;
+                    d.openTime = entry.openTime;
                     d.OpenAsk = entry.OpenAsk;
                     d.OpenBid = entry.OpenBid;
                     d.HighAsk = entry.HighAsk;
@@ -88,7 +88,7 @@ namespace HistoricalDataDownloader
                     d.LowBid = entry.LowBid;
                     d.CloseAsk = cur.CloseAsk;
                     d.CloseBid = cur.CloseBid;
-                    d.EndDate = Convert.ToDateTime(prevDate).ToString("yyyyMMdd  HH:mm:ss");
+                    //d.EndDate = Convert.ToDateTime(prevDate).ToString("yyyyMMdd  HH:mm:ss");
                     H4.Add(d);
                     clearEntry(entry);
                     //Console.WriteLine("{2} {0} {1}", curDate, timeSlots[getH4Slot(curDate)], prevDate);
@@ -119,7 +119,7 @@ namespace HistoricalDataDownloader
                     Console.WriteLine("Discontinous date: {0}   {1}   {2}", prevDate, curDate, (TimeSpan)(curDate-prevDate));
                 }
                 FxHistoricalDataEntry temp = dataRepo.DataM1[curDate];
-                if (string.IsNullOrEmpty(temp.Date))
+                if (string.IsNullOrEmpty(temp.openTime))
                 {
                     Console.WriteLine("Found empty date at {0}: {1}", curDate, temp.ToString());
                 }
@@ -166,10 +166,10 @@ namespace HistoricalDataDownloader
                 //Console.WriteLine("{0}  {1}", prevDate, curDate);
                 if (curDate.Date > prevDate.Date)
                 {
-                    if(entry.Date != "" && entry.OpenAsk > 0)
+                    if(entry.openTime != "" && entry.OpenAsk > 0)
                     {
                         FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-                        d.Date = entry.Date;
+                        d.openTime = entry.openTime;
                         d.OpenAsk = entry.OpenAsk;
                         d.OpenBid = entry.OpenBid;
                         d.HighAsk = entry.HighAsk;
@@ -181,7 +181,7 @@ namespace HistoricalDataDownloader
                         D1.Add(d);
                     }
                     clearEntry(entry);
-                    entry.Date = Convert.ToDateTime(curDate.Date).ToString("yyyyMMdd  HH:mm:ss");
+                    entry.openTime = Convert.ToDateTime(curDate.Date).ToString("yyyyMMdd  HH:mm:ss");
                 }
                 if (!dataRepo.DataM1.ContainsKey(curDate))
                 {
@@ -221,7 +221,7 @@ namespace HistoricalDataDownloader
             if(entry.OpenAsk > 0)
             {
                 FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-                d.Date = entry.Date;
+                d.openTime = entry.openTime;
                 d.OpenAsk = entry.OpenAsk;
                 d.OpenBid = entry.OpenBid;
                 d.HighAsk = entry.HighAsk;
@@ -238,7 +238,7 @@ namespace HistoricalDataDownloader
 
         public void clearEntry(FxHistoricalDataEntry entry)
         {
-            entry.Date = "";
+            entry.openTime = "";
             entry.OpenAsk = -1;
             entry.OpenBid = -1;
             entry.HighAsk = -1;

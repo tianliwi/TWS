@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using IBApi;
 using System.Threading.Tasks;
-using System.Threading;
-using System.Data;
-using System.IO;
 
 namespace IBTrader
 {

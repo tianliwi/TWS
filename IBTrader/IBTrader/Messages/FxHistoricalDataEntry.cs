@@ -3,7 +3,8 @@ namespace IBTrader
 {
 	public class FxHistoricalDataEntry
 	{
-		public string Date;
+		public string openTime;
+        public string closeTime;
 		public double OpenAsk;
 		public double OpenBid;
 		public double HighAsk;
@@ -13,7 +14,6 @@ namespace IBTrader
 		public double CloseAsk;
 		public double CloseBid;
 		public double Volume;
-        public string EndDate;
 
 		public FxHistoricalDataEntry()
 		{
@@ -21,7 +21,8 @@ namespace IBTrader
 		}
 		public override string ToString()
 		{
-			return Date + 
+			return openTime +
+                "," + closeTime +
 				"," + OpenAsk +
 				"," + OpenBid +
 				"," + HighAsk +

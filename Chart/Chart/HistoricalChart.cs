@@ -34,7 +34,7 @@ namespace Chart
         }
         private void GetData()
         {
-            var filename = Constants.BaseDir + @"\EUR\2013\2013_H4.csv";
+            var filename = Constants.BaseDir + @"\AUD\2016\20160103_M1.csv";
             string[] lines = File.ReadAllLines(filename);
             DataTable dt = new DataTable();
             dt.Columns.Add("ID", typeof(int));
@@ -51,11 +51,11 @@ namespace Chart
                 string[] col = line.Split(',');
                 DataRow row = dt.NewRow();
                 row["ID"] = lineNum++;
-                row["Date"] = DateTime.SpecifyKind(DateTime.ParseExact(col[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local);
-                row["Open"] = Double.Parse(col[1]);
-                row["High"] = Double.Parse(col[3]);
-                row["Low"] = Double.Parse(col[5]);
-                row["Close"] = Double.Parse(col[7]);
+                row["Date"] = Trader.Rfc2Date(col[0]);
+                row["Open"] = Double.Parse(col[2]);
+                row["High"] = Double.Parse(col[4]);
+                row["Low"] = Double.Parse(col[6]);
+                row["Close"] = Double.Parse(col[8]);
                 if ((double)row["Low"] < yMin) yMin = (double)row["Low"];
                 if ((double)row["High"] > yMax) yMax = (double)row["High"];
                 dt.Rows.Add(row);

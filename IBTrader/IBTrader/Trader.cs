@@ -8,6 +8,7 @@ using IBApi;
 using System.Threading;
 using System.Data;
 using System.IO;
+using System.Xml;
 
 namespace IBTrader
 {
@@ -52,6 +53,22 @@ namespace IBTrader
         {
             ibClient.ClientSocket.reqHistoricalData(reqId, contract, endTime, duration, barSize, whatToShow, 1, 1, new List<TagValue>());
         }
+        public static string Date2Rfc(DateTime d)
+        {
+            return XmlConvert.ToString(d, XmlDateTimeSerializationMode.Utc);
+        }
+        public static string DateLocal2Rfc(DateTime d)
+        {
+            return XmlConvert.ToString(d, XmlDateTimeSerializationMode.Local);
+        }
+        public static DateTime Rfc2Date(string s)
+        {
+            return XmlConvert.ToDateTime(s, XmlDateTimeSerializationMode.Utc);
+        }
+        public static DateTime Rfc2DateLocal(string s)
+        {
+            return XmlConvert.ToDateTime(s, XmlDateTimeSerializationMode.Local);
+        }
 
         public void HandleMessage(IBMessage message)
         {
@@ -63,11 +80,10 @@ namespace IBTrader
 						if (b.RequestId == (int)MessageType.FxHistoricalAsk)
 						{
 							DateTime dt = DateTime.ParseExact(b.Date, "yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
-							dt += new TimeSpan(3, 0, 0);
-							string date = dt.ToString("yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
+							string date = Date2Rfc(dt.ToUniversalTime());
 							if (_fxHistoricalDataDict.ContainsKey(date))
 							{
-								_fxHistoricalDataDict[date].Date = date;
+								_fxHistoricalDataDict[date].openTime = date;
 								_fxHistoricalDataDict[date].OpenAsk = b.Open;
 								_fxHistoricalDataDict[date].HighAsk = b.High;
 								_fxHistoricalDataDict[date].LowAsk = b.Low;
@@ -75,7 +91,7 @@ namespace IBTrader
 							}
 							else {
 								FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-								d.Date = date;
+								d.openTime = date;
 								d.OpenAsk = b.Open;
 								d.HighAsk = b.High;
 								d.LowAsk = b.Low;
@@ -86,11 +102,10 @@ namespace IBTrader
 						else if (b.RequestId == (int)MessageType.FxHistoricalBid)
 						{
 							DateTime dt = DateTime.ParseExact(b.Date, "yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
-							dt += new TimeSpan(3, 0, 0);
-							string date = dt.ToString("yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture);
+                            string date = Date2Rfc(dt.ToUniversalTime());
 							if (_fxHistoricalDataDict.ContainsKey(date))
 							{
-								_fxHistoricalDataDict[date].Date = date;
+								_fxHistoricalDataDict[date].openTime = date;
 								_fxHistoricalDataDict[date].OpenBid = b.Open;
 								_fxHistoricalDataDict[date].HighBid = b.High;
 								_fxHistoricalDataDict[date].LowBid = b.Low;
@@ -98,7 +113,7 @@ namespace IBTrader
 							}
 							else {
                                 FxHistoricalDataEntry d = new FxHistoricalDataEntry();
-								d.Date = date;
+								d.openTime = date;
 								d.OpenBid = b.Open;
 								d.HighBid = b.High;
 								d.LowBid = b.Low;

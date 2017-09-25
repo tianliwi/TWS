@@ -47,15 +47,16 @@ namespace IBTrader
             {
                 string[] cols = line.Split(',');
                 FxHistoricalDataEntry entry = new FxHistoricalDataEntry();
-                entry.Date = cols[0];
-                entry.OpenAsk = Convert.ToDouble(cols[1]);
-                entry.OpenBid = Convert.ToDouble(cols[2]);
-                entry.HighAsk = Convert.ToDouble(cols[3]);
-                entry.HighBid = Convert.ToDouble(cols[4]);
-                entry.LowAsk = Convert.ToDouble(cols[5]);
-                entry.LowBid = Convert.ToDouble(cols[6]);
-                entry.CloseAsk = Convert.ToDouble(cols[7]);
-                entry.CloseBid = Convert.ToDouble(cols[8]);
+                entry.openTime = cols[0];
+                entry.closeTime = cols[1];
+                entry.OpenAsk = Convert.ToDouble(cols[2]);
+                entry.OpenBid = Convert.ToDouble(cols[3]);
+                entry.HighAsk = Convert.ToDouble(cols[4]);
+                entry.HighBid = Convert.ToDouble(cols[5]);
+                entry.LowAsk = Convert.ToDouble(cols[6]);
+                entry.LowBid = Convert.ToDouble(cols[7]);
+                entry.CloseAsk = Convert.ToDouble(cols[8]);
+                entry.CloseBid = Convert.ToDouble(cols[9]);
                 dataList[DateTime.SpecifyKind(DateTime.ParseExact(cols[0], "yyyyMMdd  HH:mm:ss", null), DateTimeKind.Local)] = entry;
             }
         }
