@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using IBApi;
 using IBTrader;
 using System.Threading;
@@ -12,12 +13,18 @@ namespace BackTest
     {
         private DataRepo data;
         List<BTOrder> orderList;
+        public SortedList<DateTime, double> pnlList;
 
         public BackTestEngine()
         {
             data = new DataRepo("AUD", "2016");
             data.LoadCSV();
             orderList = new List<BTOrder>();
+            pnlList = new SortedList<DateTime, double>();
+            foreach(var p in data.DataM1)
+            {
+                pnlList[p.Key] = 0.0;
+            }
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         }
 
@@ -60,6 +67,13 @@ namespace BackTest
                         cur = cur.AddMinutes(1);
                         continue;
                     }
+                    double curPNL = 0;
+                    foreach(var o in orderList)
+                    {
+                        curPNL += o.pnl;
+                        curPNL -= 1.5;
+                    }
+                    pnlList[cur] = curPNL;
                     double askHigh = data.DataM1[cur].HighAsk;
                     double askLow = data.DataM1[cur].LowAsk;
                     double bidHigh = data.DataM1[cur].HighBid;
@@ -69,6 +83,7 @@ namespace BackTest
                     {
                         curOrder.enterTime = cur; // update enter time
                         curOrder.status = BTOrderType.Open; // open order
+                        PNL -= .75;
                     }
                     // Play to next minute if order is not opened yet
                     if (curOrder.status != BTOrderType.Open)
@@ -76,15 +91,16 @@ namespace BackTest
                         cur = cur.AddMinutes(1);
                         continue;
                     }
-                    // stop loss if bid is too low
-                    if (bidLow <= curOrder.stopLoss)
+                // stop loss if bid is too low
+                if (bidLow <= curOrder.stopLoss)
                     {
                         curOrder.pnl = curOrder.size * (curOrder.stopLoss - curOrder.enterPrice);
                         curOrder.closeTime = cur;
                         curOrder.closeType = BTOrderCloseType.StopLoss;
                         curOrder.closePrice = curOrder.stopLoss;
                         curOrder.status = BTOrderType.Closed;
-                        break;
+                        PNL -= .75;
+                        continue;
                     }
                     else if (bidHigh >= curOrder.takeProfit) // take profit
                     {
@@ -93,7 +109,8 @@ namespace BackTest
                         curOrder.closeType = BTOrderCloseType.TakeProfit;
                         curOrder.closePrice = curOrder.takeProfit;
                         curOrder.status = BTOrderType.Closed;
-                        break;
+                        PNL -= .75;
+                        continue;
                     }
                     cur = cur.AddMinutes(1);
                 }
@@ -102,6 +119,7 @@ namespace BackTest
                     orderList.RemoveAt(orderList.Count - 1);
                 }
             }
+            PNL = 0;
             foreach (var order in orderList)
             {
                 if (order.pnl > 0) win++;
@@ -111,7 +129,8 @@ namespace BackTest
             }
             PNL -= orderList.Count * 1.5;
             Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
-            //File.WriteAllLines(Rest.DataRootDir + @"TestResult\res.csv", orderList.Select(i => i.ToString()));
+
+            //File.WriteAllLines(IBTrader.Constants.BaseDir + "test_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv", pnlList.Select(i=>i.Value.ToString()));
             return PNL;
         }
         private Tuple<double, double> getAskHighLow(SortedList<DateTime, FxHistoricalDataEntry> list, DateTime d, int n)
