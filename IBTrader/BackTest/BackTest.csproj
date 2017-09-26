@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="BackTestEngine.cs" />
     <Compile Include="BTOrder.cs" />
+    <Compile Include="OldEngine.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

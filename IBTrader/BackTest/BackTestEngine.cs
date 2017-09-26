@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IBApi;
 using IBTrader;
-using System.ComponentModel;
 using System.Threading;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Globalization;
 
@@ -34,27 +29,31 @@ namespace BackTest
             int loss = 0;
             int id = 0;
             orderList.Clear();
-            foreach (var h4Pair in data.DataH4)
+
+            foreach (var h4Bin in data.DataH4)
             {
-                curTime = h4Pair.Key;
-                var hl = getAskHighLow(data.DataH4, curTime, 12);
-                if (hl.Item1 < 0 || hl.Item2 < 0) continue;
-                //var hl2 = getAskHighLow(data.H4, curTime, 18);
-                //if (hl2.Item1 < 0 || hl2.Item2 < 0) continue;
+                curTime = h4Bin.Key;
+                // if no order or the last order hasn't been closed
+                if (orderList.Count == 0 || orderList[orderList.Count - 1].status == BTOrderType.Closed)
+                {
+                    var hl = getAskHighLow(data.DataH4, curTime, 12);
+                    if (hl.Item1 < 0 || hl.Item2 < 0) continue;
 
-                double R = hl.Item1 - hl.Item2;
-                //double R2 = hl2.Item1 - hl2.Item2;
+                    double R = hl.Item1 - hl.Item2;
 
-                BTOrder order = new BTOrder();
-                order.ID = id++;
-                order.status = BTOrderType.Pending;
-                order.enterTime = curTime;
-                order.enterPrice = h4Pair.Value.OpenAsk - R * a;
-                order.takeProfit = order.enterPrice + R * b;
-                order.stopLoss = order.enterPrice - 0.005;
-                order.size = 8000;
+                    BTOrder order = new BTOrder();
+                    order.ID = id++;
+                    order.status = BTOrderType.Pending;
+                    order.enterTime = curTime;
+                    order.enterPrice = h4Bin.Value.OpenAsk - R * a;
+                    order.takeProfit = order.enterPrice + R * b;
+                    order.stopLoss = order.enterPrice - 0.005;
+                    order.size = 8000;
+                    orderList.Add(order);
+                }
                 DateTime cur = curTime;
-                while (cur <= Trader.Rfc2Date(h4Pair.Value.closeTime))
+                BTOrder curOrder = orderList[orderList.Count - 1];
+                while (cur <= Trader.Rfc2Date(h4Bin.Value.closeTime))
                 {
                     if (!data.DataM1.ContainsKey(cur))
                     {
@@ -66,57 +65,51 @@ namespace BackTest
                     double bidHigh = data.DataM1[cur].HighBid;
                     double bidLow = data.DataM1[cur].LowBid;
                     // Open order if target enter price is below askHigh and askLow
-                    if (order.status == BTOrderType.Pending && askLow <= order.enterPrice && askHigh >= order.enterPrice)
+                    if (curOrder.status == BTOrderType.Pending && askLow <= curOrder.enterPrice && askHigh >= curOrder.enterPrice)
                     {
-                        order.enterTime = cur; // update enter time
-                        order.status = BTOrderType.Open; // open order
+                        curOrder.enterTime = cur; // update enter time
+                        curOrder.status = BTOrderType.Open; // open order
                     }
                     // Play to next minute if order is not opened yet
-                    if (order.status != BTOrderType.Open)
+                    if (curOrder.status != BTOrderType.Open)
                     {
                         cur = cur.AddMinutes(1);
                         continue;
                     }
                     // stop loss if bid is too low
-                    if (bidLow <= order.stopLoss)
+                    if (bidLow <= curOrder.stopLoss)
                     {
-                        order.pnl = order.size * (order.stopLoss - order.enterPrice);
-                        order.closeTime = cur;
-                        order.closeType = BTOrderCloseType.StopLoss;
-                        order.closePrice = order.stopLoss;
-                        order.status = BTOrderType.Closed;
+                        curOrder.pnl = curOrder.size * (curOrder.stopLoss - curOrder.enterPrice);
+                        curOrder.closeTime = cur;
+                        curOrder.closeType = BTOrderCloseType.StopLoss;
+                        curOrder.closePrice = curOrder.stopLoss;
+                        curOrder.status = BTOrderType.Closed;
                         break;
                     }
-                    else if (bidHigh >= order.takeProfit) // take profit
+                    else if (bidHigh >= curOrder.takeProfit) // take profit
                     {
-                        order.pnl = order.size * (order.takeProfit - order.enterPrice);
-                        order.closeTime = cur;
-                        order.closeType = BTOrderCloseType.TakeProfit;
-                        order.closePrice = order.takeProfit;
-                        order.status = BTOrderType.Closed;
+                        curOrder.pnl = curOrder.size * (curOrder.takeProfit - curOrder.enterPrice);
+                        curOrder.closeTime = cur;
+                        curOrder.closeType = BTOrderCloseType.TakeProfit;
+                        curOrder.closePrice = curOrder.takeProfit;
+                        curOrder.status = BTOrderType.Closed;
                         break;
                     }
                     cur = cur.AddMinutes(1);
                 }
-                if (order.status == BTOrderType.Open)
+                if(curOrder.status == BTOrderType.Pending)
                 {
-                    double bidClose = h4Pair.Value.CloseBid;
-                    order.pnl = bidClose - order.enterPrice;
-                    order.closeTime = cur;
-                    order.closeType = BTOrderCloseType.TimeOut;
-                    order.closePrice = bidClose;
-                    order.status = BTOrderType.Closed;
-                }
-                if (order.status == BTOrderType.Closed)
-                {
-                    if (order.pnl > 0) win++;
-                    else if (order.pnl < 0) loss++;
-                    PNL += order.pnl;
-                    orderList.Add(order);
-                    Console.WriteLine("{0}, {1}, {2}", win, loss, order.pnl.ToString("C", CultureInfo.CurrentCulture));
+                    orderList.RemoveAt(orderList.Count - 1);
                 }
             }
-            PNL -= orderList.Count * 1.0;
+            foreach (var order in orderList)
+            {
+                if (order.pnl > 0) win++;
+                else if (order.pnl < 0) loss++;
+                PNL += order.pnl;
+                Console.WriteLine(order.ToString());
+            }
+            PNL -= orderList.Count * 1.5;
             Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
             //File.WriteAllLines(Rest.DataRootDir + @"TestResult\res.csv", orderList.Select(i => i.ToString()));
             return PNL;
