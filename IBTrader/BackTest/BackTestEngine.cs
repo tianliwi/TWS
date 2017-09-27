@@ -28,7 +28,7 @@ namespace BackTest
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         }
 
-        public double Start(double a, double b)
+        public double Start(double a, double b, bool pnlTrack)
         {
             DateTime curTime;
             double PNL = 0;
@@ -67,13 +67,22 @@ namespace BackTest
                         cur = cur.AddMinutes(1);
                         continue;
                     }
-                    double curPNL = 0;
-                    foreach(var o in orderList)
+                    if (pnlTrack)
                     {
-                        curPNL += o.pnl;
-                        curPNL -= 1.5;
+                        double curPNL = 0;
+                        foreach (var o in orderList)
+                        {
+                            curPNL += o.pnl;
+                            if (o.status == BTOrderType.Open)
+                            {
+                                curPNL += data.DataM1[cur].CloseBid - o.enterPrice;
+                                curPNL -= .75;
+                            }
+                            else
+                                curPNL -= 1.5;
+                        }
+                        pnlList[cur] = curPNL;
                     }
-                    pnlList[cur] = curPNL;
                     double askHigh = data.DataM1[cur].HighAsk;
                     double askLow = data.DataM1[cur].LowAsk;
                     double bidHigh = data.DataM1[cur].HighBid;
@@ -125,10 +134,10 @@ namespace BackTest
                 if (order.pnl > 0) win++;
                 else if (order.pnl < 0) loss++;
                 PNL += order.pnl;
-                Console.WriteLine(order.ToString());
+                //Console.WriteLine(order.ToString());
             }
             PNL -= orderList.Count * 1.5;
-            Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
+            //Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
 
             //File.WriteAllLines(IBTrader.Constants.BaseDir + "test_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv", pnlList.Select(i=>i.Value.ToString()));
             return PNL;

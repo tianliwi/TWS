@@ -15,17 +15,17 @@ namespace BackTest
         static void Main(string[] args)
         {
             BackTestEngine engine = new BackTestEngine();
-            double pnl = engine.Start(0.3, 0.74);
-            return;
+            //double pnl = engine.Start(0.3, 0.74);
+            //return;
             double max = 0.0;
             double ma = -1, mb = -1;
             string row = string.Empty;
             string filename = IBTrader.Constants.BaseDir + "matrix_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
-            for (double a = 0.1; a < 0.7; a += .04)
+            for (double a = 0.1; a < 0.7; a += .02)
             {
-                for (double b = 0.1; b < 0.8; b += .04)
+                for (double b = 0.1; b < 0.8; b += .02)
                 {
-                    double r = engine.Start(a, b);
+                    double r = engine.Start(a, b, false);
                     if (r > max)
                     {
                         max = r;
