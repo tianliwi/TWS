@@ -21,9 +21,9 @@ namespace BackTest
             double ma = -1, mb = -1;
             string row = string.Empty;
             string filename = IBTrader.Constants.BaseDir + "matrix_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv";
-            for (double a = 0.1; a < 0.7; a += .02)
+            for (double a = 0; a < 0.3; a += .01)
             {
-                for (double b = 0.1; b < 0.8; b += .02)
+                for (double b = 0; b < 0.4; b += .01)
                 {
                     double r = engine.Start(a, b, false);
                     if (r > max)
@@ -32,7 +32,7 @@ namespace BackTest
                         ma = a;
                         mb = b;
                     }
-                    Console.WriteLine("{0}, {1}: {2}", a, b, r.ToString("C", CultureInfo.CurrentCulture));
+                    //Console.WriteLine("{0}, {1}: {2}", a, b, r.ToString());
                     if (string.IsNullOrEmpty(row)) row = r.ToString();
                     else row = row + "," + Math.Round(r, 2).ToString();
                 }

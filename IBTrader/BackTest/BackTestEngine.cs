@@ -21,7 +21,7 @@ namespace BackTest
             data.LoadCSV();
             orderList = new List<BTOrder>();
             pnlList = new SortedList<DateTime, double>();
-            foreach(var p in data.DataM1)
+            foreach(var p in data.DataH4)
             {
                 pnlList[p.Key] = 0.0;
             }
@@ -35,6 +35,7 @@ namespace BackTest
             int win = 0;
             int loss = 0;
             int id = 0;
+            double R, R2=0;
             orderList.Clear();
 
             foreach (var h4Bin in data.DataH4)
@@ -45,8 +46,11 @@ namespace BackTest
                 {
                     var hl = getAskHighLow(data.DataH4, curTime, 12);
                     if (hl.Item1 < 0 || hl.Item2 < 0) continue;
+                    R = hl.Item1 - hl.Item2;
 
-                    double R = hl.Item1 - hl.Item2;
+                    var hl2 = getAskHighLow(data.DataH4, curTime, 18);
+                    if (hl2.Item1 < 0 || hl2.Item2 < 0) continue;
+                    R2 = hl2.Item1 - hl2.Item2;
 
                     BTOrder order = new BTOrder();
                     order.ID = id++;
@@ -60,6 +64,20 @@ namespace BackTest
                 }
                 DateTime cur = curTime;
                 BTOrder curOrder = orderList[orderList.Count - 1];
+                if (pnlTrack)
+                {
+                    double curPNL = 0;
+                    foreach (var o in orderList)
+                    {
+                        curPNL += o.pnl;
+                        if (o.status == BTOrderType.Open)
+                        {
+                            curPNL += data.DataM1[cur].CloseBid - o.enterPrice;
+                        }
+                        curPNL -= 1.5;
+                    }
+                    pnlList[cur] = curPNL;
+                }
                 while (cur <= Trader.Rfc2Date(h4Bin.Value.closeTime))
                 {
                     if (!data.DataM1.ContainsKey(cur))
@@ -67,28 +85,14 @@ namespace BackTest
                         cur = cur.AddMinutes(1);
                         continue;
                     }
-                    if (pnlTrack)
-                    {
-                        double curPNL = 0;
-                        foreach (var o in orderList)
-                        {
-                            curPNL += o.pnl;
-                            if (o.status == BTOrderType.Open)
-                            {
-                                curPNL += data.DataM1[cur].CloseBid - o.enterPrice;
-                                curPNL -= .75;
-                            }
-                            else
-                                curPNL -= 1.5;
-                        }
-                        pnlList[cur] = curPNL;
-                    }
                     double askHigh = data.DataM1[cur].HighAsk;
                     double askLow = data.DataM1[cur].LowAsk;
                     double bidHigh = data.DataM1[cur].HighBid;
                     double bidLow = data.DataM1[cur].LowBid;
                     // Open order if target enter price is below askHigh and askLow
-                    if (curOrder.status == BTOrderType.Pending && askLow <= curOrder.enterPrice && askHigh >= curOrder.enterPrice)
+                    if (curOrder.status == BTOrderType.Pending && 
+                        askLow <= curOrder.enterPrice && askHigh >= curOrder.enterPrice &&
+                        R2 >= 0.013 && R2 <= 0.019)
                     {
                         curOrder.enterTime = cur; // update enter time
                         curOrder.status = BTOrderType.Open; // open order
@@ -140,6 +144,12 @@ namespace BackTest
             //Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
 
             //File.WriteAllLines(IBTrader.Constants.BaseDir + "test_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv", pnlList.Select(i=>i.Value.ToString()));
+            //return PNL;
+            double rate = (double)win / (win + loss);
+            if(PNL > 0.8)
+            {
+                Console.WriteLine("{0} {1}: {2} {3}", a, b, rate, PNL);
+            }
             return PNL;
         }
         private Tuple<double, double> getAskHighLow(SortedList<DateTime, FxHistoricalDataEntry> list, DateTime d, int n)
