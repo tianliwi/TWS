@@ -14,11 +14,11 @@ namespace BackTest
         private DataRepo data;
         List<BTOrder> orderList;
         public SortedList<DateTime, double> pnlList;
+        private static double commission = 2;
 
         public BackTestEngine()
         {
-            data = new DataRepo("AUD", "2016");
-            data.LoadCSV();
+            data = new DataRepo("AUD", new string[] { "2016"});
             orderList = new List<BTOrder>();
             pnlList = new SortedList<DateTime, double>();
             foreach(var p in data.DataH4)
@@ -59,7 +59,7 @@ namespace BackTest
                     order.enterPrice = h4Bin.Value.OpenAsk - R * a;
                     order.takeProfit = order.enterPrice + R * b;
                     order.stopLoss = order.enterPrice - 0.005;
-                    order.size = 8000;
+                    order.size = 10000;
                     orderList.Add(order);
                 }
                 DateTime cur = curTime;
@@ -74,7 +74,7 @@ namespace BackTest
                         {
                             curPNL += data.DataM1[cur].CloseBid - o.enterPrice;
                         }
-                        curPNL -= 1.5;
+                        curPNL -= commission * 2.0;
                     }
                     pnlList[cur] = curPNL;
                 }
@@ -91,12 +91,12 @@ namespace BackTest
                     double bidLow = data.DataM1[cur].LowBid;
                     // Open order if target enter price is below askHigh and askLow
                     if (curOrder.status == BTOrderType.Pending && 
-                        askLow <= curOrder.enterPrice && askHigh >= curOrder.enterPrice &&
-                        R2 >= 0.013 && R2 <= 0.019)
+                        askLow <= curOrder.enterPrice && askHigh >= curOrder.enterPrice)// &&
+                        //R2 >= 0.013 && R2 <= 0.019)
                     {
                         curOrder.enterTime = cur; // update enter time
                         curOrder.status = BTOrderType.Open; // open order
-                        PNL -= .75;
+                        PNL -= commission;
                     }
                     // Play to next minute if order is not opened yet
                     if (curOrder.status != BTOrderType.Open)
@@ -112,7 +112,7 @@ namespace BackTest
                         curOrder.closeType = BTOrderCloseType.StopLoss;
                         curOrder.closePrice = curOrder.stopLoss;
                         curOrder.status = BTOrderType.Closed;
-                        PNL -= .75;
+                        PNL -= commission;
                         continue;
                     }
                     else if (bidHigh >= curOrder.takeProfit) // take profit
@@ -122,7 +122,7 @@ namespace BackTest
                         curOrder.closeType = BTOrderCloseType.TakeProfit;
                         curOrder.closePrice = curOrder.takeProfit;
                         curOrder.status = BTOrderType.Closed;
-                        PNL -= .75;
+                        PNL -= commission;
                         continue;
                     }
                     cur = cur.AddMinutes(1);
@@ -140,15 +140,15 @@ namespace BackTest
                 PNL += order.pnl;
                 //Console.WriteLine(order.ToString());
             }
-            PNL -= orderList.Count * 1.5;
+            PNL -= orderList.Count * commission * 2;
             //Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
 
             //File.WriteAllLines(IBTrader.Constants.BaseDir + "test_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv", pnlList.Select(i=>i.Value.ToString()));
             //return PNL;
             double rate = (double)win / (win + loss);
-            if(PNL > 0.8)
+            if(PNL > 0)
             {
-                Console.WriteLine("{0} {1}: {2} {3}", a, b, rate, PNL);
+                Console.WriteLine("{0} {1}:{4} {2} {3}", a, b, rate, PNL, win + loss);
             }
             return PNL;
         }

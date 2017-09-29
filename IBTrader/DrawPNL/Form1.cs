@@ -26,8 +26,8 @@ namespace DrawPNL
         {
 
             BackTestEngine engine = new BackTestEngine();
-            double pnl = engine.Start(0.11, 0.12, true);
-            var series = chart1.Series.ElementAt(0);// new Series("PnL");
+            double pnl = engine.Start(0.12, 0.2, true);
+            var series = chart1.Series.ElementAt(0);
             series.ChartType = SeriesChartType.Line;
             List<int> x = new List<int>();
             List<double> y = new List<double>();
@@ -38,8 +38,6 @@ namespace DrawPNL
 
             }
             series.Points.DataBindXY(x, y);
-            //chart1.Series.RemoveAt(0);
-            //chart1.Series.Add(series);
         }
     }
 }

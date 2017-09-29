@@ -30,7 +30,7 @@ namespace BackTest
 
         public OldEngine()
         {
-            data = new DataRepo("AUD", "2016");
+            data = new DataRepo("AUD", new string[] { "2016" });
             barM1 = new LinkedList<FxHistoricalDataEntry>();
             barH4 = new LinkedList<FxHistoricalDataEntry>();
             LoadTicks();
@@ -38,7 +38,6 @@ namespace BackTest
         public void LoadTicks()
         {
             Console.WriteLine("Starting loading tick data...");
-            data.LoadCSV();
             tickMinDate = data.DataM1.Keys.Min();
             tickMaxDate = data.DataM1.Keys.Max();
             tickCur = tickMinDate.AddMinutes(-1);

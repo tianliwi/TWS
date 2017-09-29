@@ -13,18 +13,20 @@ namespace IBTrader
         public SortedList<DateTime, FxHistoricalDataEntry> DataH4;
         public SortedList<DateTime, FxHistoricalDataEntry> DataD1;
         private string symbol;
-        private string year;
 
-        public DataRepo(string symbol, string year)
+        public DataRepo(string symbol, string[] years)
         {
             DataM1 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataH4 = new SortedList<DateTime, FxHistoricalDataEntry>();
             DataD1 = new SortedList<DateTime, FxHistoricalDataEntry>();
             this.symbol = symbol;
-            this.year = year;
+            foreach(string year in years)
+            {
+                LoadCSV(year);
+            }
         }
 
-        public void LoadCSV()
+        public void LoadCSV(string year)
         {
             LoadOneCSV(DataD1, year, "D1");
             LoadOneCSV(DataH4, year, "H4");
