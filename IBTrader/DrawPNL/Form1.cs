@@ -26,7 +26,7 @@ namespace DrawPNL
         {
 
             BackTestEngine engine = new BackTestEngine();
-            double pnl = engine.Start(0.12, 0.2, true);
+            double pnl = engine.Start(0.12, 0.24, true);
             var series = chart1.Series.ElementAt(0);
             series.ChartType = SeriesChartType.Line;
             List<int> x = new List<int>();

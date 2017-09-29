@@ -18,7 +18,7 @@ namespace BackTest
 
         public BackTestEngine()
         {
-            data = new DataRepo("AUD", new string[] { "2016"});
+            data = new DataRepo("AUD", new string[] { "2016", "2017"});
             orderList = new List<BTOrder>();
             pnlList = new SortedList<DateTime, double>();
             foreach(var p in data.DataH4)
@@ -44,11 +44,11 @@ namespace BackTest
                 // if no order or the last order hasn't been closed
                 if (orderList.Count == 0 || orderList[orderList.Count - 1].status == BTOrderType.Closed)
                 {
-                    var hl = getAskHighLow(data.DataH4, curTime, 12);
+                    var hl = getAskHighLow(data.DataH4, curTime, 6);
                     if (hl.Item1 < 0 || hl.Item2 < 0) continue;
                     R = hl.Item1 - hl.Item2;
 
-                    var hl2 = getAskHighLow(data.DataH4, curTime, 18);
+                    var hl2 = getAskHighLow(data.DataH4, curTime, 6);
                     if (hl2.Item1 < 0 || hl2.Item2 < 0) continue;
                     R2 = hl2.Item1 - hl2.Item2;
 
@@ -59,7 +59,7 @@ namespace BackTest
                     order.enterPrice = h4Bin.Value.OpenAsk - R * a;
                     order.takeProfit = order.enterPrice + R * b;
                     order.stopLoss = order.enterPrice - 0.005;
-                    order.size = 10000;
+                    order.size = 80000;
                     orderList.Add(order);
                 }
                 DateTime cur = curTime;
@@ -146,7 +146,7 @@ namespace BackTest
             //File.WriteAllLines(IBTrader.Constants.BaseDir + "test_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv", pnlList.Select(i=>i.Value.ToString()));
             //return PNL;
             double rate = (double)win / (win + loss);
-            if(PNL > 0)
+            if(PNL > 100000000)
             {
                 Console.WriteLine("{0} {1}:{4} {2} {3}", a, b, rate, PNL, win + loss);
             }
