@@ -25,7 +25,7 @@ namespace HistoricalDataDownloader
         public DataProcessor(string symbol, string year)
         {
             this.year = year;
-            dataRepo = new DataRepo(symbol, this.year);
+            dataRepo = new DataRepo(symbol, new string[] { this.year });
             D1 = new List<FxHistoricalDataEntry>();
             H4 = new List<FxHistoricalDataEntry>();
             

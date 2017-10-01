@@ -10,16 +10,21 @@ using System.Globalization;
 namespace BackTest
 {
     public class BackTestEngine
-    {
+    {/*
         private DataRepo data;
-        List<BTOrder> orderList;
+        List<BTOrder> pendOrders;
+        List<BTOrder> openOrders;
+        List<BTOrder> closedOrders;
         public SortedList<DateTime, double> pnlList;
-        private static double commission = 2;
+        private static double commission = 0;
 
         public BackTestEngine()
         {
-            data = new DataRepo("AUD", new string[] { "2016", "2017"});
-            orderList = new List<BTOrder>();
+            data = new DataRepo("AUD", new string[] {"2015", "2016"});
+            pendOrders = new List<BTOrder>();
+            openOrders = new List<BTOrder>();
+            closedOrders = new List<BTOrder>();
+
             pnlList = new SortedList<DateTime, double>();
             foreach(var p in data.DataH4)
             {
@@ -30,53 +35,64 @@ namespace BackTest
 
         public double Start(double a, double b, bool pnlTrack)
         {
-            DateTime curTime;
             double PNL = 0;
             int win = 0;
             int loss = 0;
             int id = 0;
             double R, R2=0;
-            orderList.Clear();
+            openOrders.Clear();
+            closedOrders.Clear();
 
             foreach (var h4Bin in data.DataH4)
             {
-                curTime = h4Bin.Key;
-                // if no order or the last order hasn't been closed
-                if (orderList.Count == 0 || orderList[orderList.Count - 1].status == BTOrderType.Closed)
-                {
-                    var hl = getAskHighLow(data.DataH4, curTime, 6);
-                    if (hl.Item1 < 0 || hl.Item2 < 0) continue;
-                    R = hl.Item1 - hl.Item2;
-
-                    var hl2 = getAskHighLow(data.DataH4, curTime, 6);
-                    if (hl2.Item1 < 0 || hl2.Item2 < 0) continue;
-                    R2 = hl2.Item1 - hl2.Item2;
-
-                    BTOrder order = new BTOrder();
-                    order.ID = id++;
-                    order.status = BTOrderType.Pending;
-                    order.enterTime = curTime;
-                    order.enterPrice = h4Bin.Value.OpenAsk - R * a;
-                    order.takeProfit = order.enterPrice + R * b;
-                    order.stopLoss = order.enterPrice - 0.005;
-                    order.size = 80000;
-                    orderList.Add(order);
-                }
-                DateTime cur = curTime;
-                BTOrder curOrder = orderList[orderList.Count - 1];
+                pendOrders.Clear();
+                DateTime cur = h4Bin.Key;
                 if (pnlTrack)
                 {
                     double curPNL = 0;
-                    foreach (var o in orderList)
+                    foreach (var o in closedOrders)
                     {
                         curPNL += o.pnl;
                         if (o.status == BTOrderType.Open)
                         {
-                            curPNL += data.DataM1[cur].CloseBid - o.enterPrice;
+                            curPNL += data.DataM1[cur].CloseBid - o.openPrice;
                         }
                         curPNL -= commission * 2.0;
                     }
                     pnlList[cur] = curPNL;
+                }
+                // if no open order
+                if (openOrders.Count == 0)
+                {
+                    var hl = getAskHighLow(data.DataH4, cur, 12);
+                    if (hl.Item1 < 0 || hl.Item2 < 0) continue;
+                    R = hl.Item1 - hl.Item2;
+
+                    var hl2 = getAskHighLow(data.DataH4, cur, 6);
+                    if (hl2.Item1 < 0 || hl2.Item2 < 0) continue;
+                    R2 = hl2.Item1 - hl2.Item2;
+                    // long order
+                    BTOrder longOrder = new BTOrder();
+                    longOrder.ID = id++;
+                    longOrder.status = BTOrderType.Pending;
+                    longOrder.dir = BTOrderDir.Long;
+                    longOrder.openTime = cur;
+                    longOrder.openPrice = h4Bin.Value.OpenAsk - R * a;
+                    longOrder.takeProfit = longOrder.openPrice + R * b;
+                    longOrder.stopLoss = longOrder.openPrice - 0.005;
+                    longOrder.size = 8000;
+                    pendOrders.Add(longOrder);
+                    // short order
+                    BTOrder shortOrder = new BTOrder();
+                    shortOrder.ID = id++;
+                    shortOrder.status = BTOrderType.Pending;
+                    shortOrder.dir = BTOrderDir.Short;
+                    shortOrder.openTime = cur;
+                    shortOrder.openPrice = h4Bin.Value.OpenBid + R * a;
+                    shortOrder.takeProfit = shortOrder.openPrice - R * b;
+                    shortOrder.stopLoss = shortOrder.openPrice + 0.005;
+                    shortOrder.size = 8000;
+                    pendOrders.Add(shortOrder);
                 }
                 while (cur <= Trader.Rfc2Date(h4Bin.Value.closeTime))
                 {
@@ -127,20 +143,16 @@ namespace BackTest
                     }
                     cur = cur.AddMinutes(1);
                 }
-                if(curOrder.status == BTOrderType.Pending)
-                {
-                    orderList.RemoveAt(orderList.Count - 1);
-                }
             }
             PNL = 0;
-            foreach (var order in orderList)
+            foreach (var order in closedOrders)
             {
                 if (order.pnl > 0) win++;
                 else if (order.pnl < 0) loss++;
                 PNL += order.pnl;
                 //Console.WriteLine(order.ToString());
             }
-            PNL -= orderList.Count * commission * 2;
+            PNL -= closedOrders.Count * commission * 2;
             //Console.WriteLine("Win: {0}\nLoss: {1}\nPNL: {2}", win, loss, PNL.ToString("C", CultureInfo.CurrentCulture));
 
             //File.WriteAllLines(IBTrader.Constants.BaseDir + "test_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".csv", pnlList.Select(i=>i.Value.ToString()));
@@ -173,6 +185,6 @@ namespace BackTest
                 }
             }
             return Tuple.Create(high, low);
-        }
+        }*/
     }
 }
